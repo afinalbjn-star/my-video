@@ -19,6 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: List files for debugging
+        run: ls -R
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -29,7 +32,8 @@ jobs:
         run: npm install
 
       - name: Render Video
-        uses: remotion-dev/github-action@v1
+        # Menggunakan versi spesifik v1.5.0 untuk memaksa GitHub memperbarui cache action
+        uses: remotion-dev/github-action@v1.5.0
         with:
           composition: BusinessStats
           entry-point: src/index.ts

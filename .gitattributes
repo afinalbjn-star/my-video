@@ -1,0 +1,8 @@
+* text=auto
+
+# Pastikan file .gitattributes sendiri selalu menggunakan LF
+.gitattributes text eol=lf
+
+# Pastikan file kode selalu menggunakan LF agar konsisten dengan server/Linux
+*.tsx text eol=lf
+*.ts text eol=lf

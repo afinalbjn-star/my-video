@@ -2,6 +2,7 @@ import "./index.css";
 import { Composition } from "remotion";
 import { MyComposition } from "./Composition";
 import { Nando } from "./nando";
+import { Vidku } from "./vidku";
 
 export const RemotionRoot: React.FC = () => {
   return (
@@ -18,6 +19,14 @@ export const RemotionRoot: React.FC = () => {
         id="BusinessStats"
         component={Nando}
         durationInFrames={300}
+        fps={60}
+        width={2560}
+        height={1440}
+      />
+      <Composition
+        id="DataStatsVideo"
+        component={Vidku}
+        durationInFrames={480}
         fps={60}
         width={2560}
         height={1440}

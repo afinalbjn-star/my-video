@@ -59,6 +59,11 @@ import HackerAttackLoop, {
     HACKER_ATTACK_HEIGHT,
     HACKER_ATTACK_WIDTH,
 } from './HackerAttackLoop';
+import {
+    AnimatedBarChart,
+    ANIMATED_BAR_CHART_CONFIG,
+} from './AnimatedBarChart';
+import { UnderwaterBubbles, VIDEO_CONFIG as UnderwaterBubblesConfig } from './UnderwaterBubbles';
 import { VIDEO_CONFIG } from './index'; // VIDEO_CONFIG dari index untuk komposisi lain
 
 export const RemotionRoot: React.FC = () => {
@@ -399,6 +404,22 @@ export const RemotionRoot: React.FC = () => {
                 fps={HACKER_ATTACK_FPS}
                 width={HACKER_ATTACK_WIDTH}
                 height={HACKER_ATTACK_HEIGHT}
+            />
+            <Composition
+                id="AnimatedBarChart"
+                component={AnimatedBarChart}
+                durationInFrames={ANIMATED_BAR_CHART_CONFIG.durationInFrames}
+                fps={ANIMATED_BAR_CHART_CONFIG.fps}
+                width={ANIMATED_BAR_CHART_CONFIG.width}
+                height={ANIMATED_BAR_CHART_CONFIG.height}
+            />
+            <Composition
+                id="UnderwaterBubbles"
+                component={UnderwaterBubbles}
+                durationInFrames={UnderwaterBubblesConfig.durationInFrames}
+                fps={UnderwaterBubblesConfig.fps}
+                width={UnderwaterBubblesConfig.width}
+                height={UnderwaterBubblesConfig.height}
             />
         </>
     );

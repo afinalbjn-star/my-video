@@ -53,6 +53,7 @@ on:
           - AIBrainBackground
           - LowPolyLoop
           - HackerAttackLoop
+          - UnderwaterBubbles
       crf:
         description: 'Kualitas Video / CRF (0-51, makin rendah makin tajam, default: 16)'
         required: false
@@ -86,7 +87,7 @@ jobs:
           EXTRA_ARGS="--crf=$CRF"
           if [ -n "$BITRATE" ]; then EXTRA_ARGS="--bitrate=$BITRATE"; fi
           echo "COMP_ID=$COMP_ID" >> $GITHUB_ENV
-          npx remotion render src/index.tsx "$COMP_ID" "out/$COMP_ID.mp4" $EXTRA_ARGS --timeout=120000
+          npx remotion render src/entry.tsx "$COMP_ID" "out/$COMP_ID.mp4" $EXTRA_ARGS --timeout=120000
 
       - name: Upload Video
         uses: actions/upload-artifact@v4

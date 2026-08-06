@@ -45,7 +45,8 @@
     "upgrade": "remotion upgrade",
     "lint": "eslint src && tsc",
     "render": "remotion render src/Root.tsx SilkFlowScene out/silk-flow-4k.mp4",
-    "render-all": "npx remotion render KembangApi out/KembangApi.mp4 && npx remotion render PolygonalBackground out/PolygonalBackground.mp4 && npx remotion render NeonLinesBackground out/NeonLinesBackground.mp4 && npx remotion render PlexusTunnel out/PlexusTunnel.mp4"
+    "render-all": "npx remotion render KembangApi out/KembangApi.mp4 && npx remotion render PolygonalBackground out/PolygonalBackground.mp4 && npx remotion render NeonLinesBackground out/NeonLinesBackground.mp4 && npx remotion render PlexusTunnel out/PlexusTunnel.mp4",
+    "render-underwater-bubbles": "remotion render src/Root.tsx UnderwaterBubbles out/underwater-bubbles-4k.mp4"
   },
   "sideEffects": [
     "*.css"

@@ -13,7 +13,7 @@ import TechNexus from './TechNexus';
 import MyVideo from './MyVideo'; // Impor komponen MyVideo
 import DarkWaves from './DarkWaves';
 import LakeSurface from './LakeSurface';
-import BioluminescentDeep from './BioluminescentDeep';
+import BioluminescentDeep, { VIDEO_CONFIG as BioluminescentDeepConfig } from './BioluminescentDeep';
 import { CinematicWave } from './CinematicWave';
 import InkBillow from './InkBillow';
 import SilkWave from './SilkWave';
@@ -38,6 +38,21 @@ import { QuantumEntanglement } from './QuantumEntanglement';
 import { CelestialMechanic } from './CelestialMechanic';
 import { ParticleWave } from './ParticleWave';
 import { EmeraldWaveAnimation } from './EmeraldWaveAnimation';
+import { HolographicFoil } from './HolographicFoil';
+import HexagonWaveRipple, { VIDEO_CONFIG as HexagonWaveRippleConfig } from './HexagonWaveRipple';
+import AIBrainBackground, {
+    COMPOSITION_DURATION_IN_FRAMES as AIBrainDurationInFrames,
+    COMPOSITION_FPS as AIBrainFps,
+    COMPOSITION_HEIGHT as AIBrainHeight,
+    COMPOSITION_WIDTH as AIBrainWidth,
+} from './AIBrainBackground';
+import {
+    LowPolyLoop,
+    VIDEO_DURATION_IN_FRAMES as LowPolyLoopDurationInFrames,
+    VIDEO_FPS as LowPolyLoopFps,
+    VIDEO_HEIGHT as LowPolyLoopHeight,
+    VIDEO_WIDTH as LowPolyLoopWidth,
+} from './LowPolyLoop';
 import { VIDEO_CONFIG } from './index'; // VIDEO_CONFIG dari index untuk komposisi lain
 
 export const RemotionRoot: React.FC = () => {
@@ -134,10 +149,10 @@ export const RemotionRoot: React.FC = () => {
             <Composition
                 id="BioluminescentDeep"
                 component={BioluminescentDeep}
-                durationInFrames={VIDEO_CONFIG.durationInFrames}
-                fps={VIDEO_CONFIG.fps}
-                width={VIDEO_CONFIG.width}
-                height={VIDEO_CONFIG.height}
+                durationInFrames={BioluminescentDeepConfig.durationInFrames}
+                fps={BioluminescentDeepConfig.fps}
+                width={BioluminescentDeepConfig.width}
+                height={BioluminescentDeepConfig.height}
             />
             <Composition
                 id="CinematicWave"
@@ -331,6 +346,45 @@ export const RemotionRoot: React.FC = () => {
                 fps={VIDEO_CONFIG.fps}
                 width={VIDEO_CONFIG.width}
                 height={VIDEO_CONFIG.height}
+                defaultProps={{
+                    theme: 'customPink', // Anda bisa menggunakan ini untuk variasi tema
+                    customLayers: undefined,
+                    particleSettings: undefined,
+                }}
+            />
+            <Composition
+                id="HolographicFoil"
+                component={HolographicFoil}
+                durationInFrames={600} // 10 detik pada 60fps
+                fps={60}
+                width={3840}
+                height={2160}
+            />
+            {/* ─── HexagonWaveRipple: 4K 60fps Seamless Loop ─── */}
+            <Composition
+                id="HexagonWaveRipple"
+                component={HexagonWaveRipple}
+                durationInFrames={HexagonWaveRippleConfig.durationInFrames}
+                fps={HexagonWaveRippleConfig.fps}
+                width={HexagonWaveRippleConfig.width}
+                height={HexagonWaveRippleConfig.height}
+            />
+            <Composition
+                id="AIBrainBackground"
+                component={AIBrainBackground}
+                durationInFrames={AIBrainDurationInFrames}
+                fps={AIBrainFps}
+                width={AIBrainWidth}
+                height={AIBrainHeight}
+            />
+            {/* ─── LowPolyLoop: 4K 60fps Seamless Crystal Mesh Loop ─── */}
+            <Composition
+                id="LowPolyLoop"
+                component={LowPolyLoop}
+                durationInFrames={LowPolyLoopDurationInFrames}
+                fps={LowPolyLoopFps}
+                width={LowPolyLoopWidth}
+                height={LowPolyLoopHeight}
             />
         </>
     );

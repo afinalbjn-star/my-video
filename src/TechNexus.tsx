@@ -3,7 +3,6 @@ import {
     AbsoluteFill,
     useCurrentFrame,
     useVideoConfig,
-    interpolate,
 } from 'remotion';
 
 // ─── Helpers ───────────────────────────────────────────────────────────

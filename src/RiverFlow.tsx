@@ -1,4 +1,4 @@
-import { AbsoluteFill, useCurrentFrame, useVideoConfig, staticFile } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
 import React from "react";
 
 export const VIDEO_CONFIG = {
@@ -10,7 +10,7 @@ export const VIDEO_CONFIG = {
 
 const RiverFlow: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { durationInFrames } = useVideoConfig();
 
   // Menghitung offset untuk seamless loop
   // Menggeser noise secara horizontal dan vertikal untuk membuat aliran air

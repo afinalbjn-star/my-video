@@ -1,18 +1,45 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
-import { createNoise2D } from 'simplex-noise';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+
+// Menggunakan fungsi noise yang sama dengan EmeraldWaveAnimation untuk konsistensi dan seamless loop
+const hash = (n: number) => {
+    let x = Math.sin(n * 127.1 + n * 311.7) * 43758.5453;
+    return x - Math.floor(x);
+};
+
+const noise2D = (x: number, y: number) => {
+    const ix = Math.floor(x);
+    const iy = Math.floor(y);
+    const fx = x - ix;
+    const fy = y - iy;
+    const sx = fx * fx * (3 - 2 * fx);
+    const sy = fy * fy * (3 - 2 * fy);
+    const a = hash(ix + iy * 57);
+    const b = hash(ix + 1 + iy * 57);
+    const c = hash(ix + (iy + 1) * 57);
+    const d = hash(ix + 1 + (iy + 1) * 57);
+    return (1 - sy) * ((1 - sx) * a + sx * b) + sy * ((1 - sx) * c + sx * d);
+};
+
+const seamlessNoise = (t: number, x: number, y: number, R: number) => {
+    const angle = t * Math.PI * 2;
+    const noiseX = x + Math.cos(angle) * R;
+    const noiseY = y + Math.sin(angle) * R;
+    return noise2D(noiseX, noiseY);
+};
 
 const MyVideo: React.FC = () => {
     const frame = useCurrentFrame();
-    const { fps, durationInFrames } = useVideoConfig();
-    const noise2D = createNoise2D();
+    const { durationInFrames } = useVideoConfig();
+    const t = frame / durationInFrames;
 
     // Calculate the color based on the frame
     const waterColor = interpolateColors(frame, durationInFrames);
 
     // Calculate the wave animation
     const waveAnimation = (x: number, y: number) => {
-        const noiseValue = noise2D(x, y + frame / 10);
+        // Menggunakan seamlessNoise untuk memastikan loop yang mulus
+        const noiseValue = seamlessNoise(t, x, y, 2);
         return (noiseValue + 1) / 2;
     };
 

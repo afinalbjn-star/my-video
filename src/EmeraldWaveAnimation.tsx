@@ -40,8 +40,7 @@ const fbm = (x: number, y: number, octaves: number = 5) => {
 
 // SEAMLESS noise: sample on a circle so t=0 and t=1 give same value
 // Maps t ∈ [0,1] → (cx + R*cos(2πt), cy + R*sin(2πt)) in noise space
-const seamlessNoise2D = (t: number, cx: number, cy: number, R: number, octaves: number = 4) => {
-    const angle = t * Math.PI * 2;
+const seamlessNoise2D = (angle: number, cx: number, cy: number, R: number, octaves: number = 4) => {
     return fbm(cx + Math.cos(angle) * R, cy + Math.sin(angle) * R, octaves);
 };
 
@@ -60,24 +59,25 @@ export const EmeraldWaveAnimation: React.FC = () => {
         // === Seamless loop time: t ∈ [0,1) with sin/cos → perfect loop ===
         const t = frame / durationInFrames;
         const T = t * Math.PI * 2; // 0 → 2π (all sin/cos(T) are periodic → seamless)
+        const angle = t * Math.PI * 2; // Angle for seamlessNoise2D
 
-        // === BACKGROUND: Deep dark emerald gradient ===
+        // === BACKGROUND: Deep dark pink gradient ===
         const bgGrad = ctx.createRadialGradient(
             width * 0.5 + Math.sin(T * 0.3) * 200,
             height * 0.5 + Math.cos(T * 0.4) * 150,
             0,
             width * 0.5, height * 0.5, width * 0.8
         );
-        bgGrad.addColorStop(0, '#041a10');
-        bgGrad.addColorStop(0.4, '#021209');
-        bgGrad.addColorStop(1, '#010805');
+        bgGrad.addColorStop(0, '#4d0a30'); // Lighter pink in the center
+        bgGrad.addColorStop(0.4, '#330620'); // Medium dark pink
+        bgGrad.addColorStop(1, '#1a0210'); // Deepest pink at the edges
         ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, width, height);
 
         // === LAYER 0: Flowing noise field (SEAMLESS via circular sampling) ===
         for (let ny = 0; ny < height; ny += 14) {
             for (let nx = 0; nx < width; nx += 14) {
-                const n = seamlessNoise2D(t, nx * 0.002, ny * 0.002, 2, 4);
+                const n = seamlessNoise2D(angle, nx * 0.002, ny * 0.002, 2, 4);
                 const brightness = Math.floor(n * 25);
                 ctx.fillStyle = `rgba(0, ${80 + brightness * 3}, ${40 + brightness * 2}, ${0.03 + n * 0.04})`;
                 ctx.fillRect(nx, ny, 14, 14);
@@ -87,11 +87,11 @@ export const EmeraldWaveAnimation: React.FC = () => {
         // === LAYER 1: Major fluid wave surfaces (6 layers) ===
         // All waves use sin/cos(T * speed) → periodic → SEAMLESS
         const waveConfigs = [
-            { amp: 180, f1: 4, f2: 7, f3: 11, f4: 17, spd: 1,   yOff: 0.42, op: 0.85, r: 0, g: 220, b: 130 },
-            { amp: 140, f1: 5, f2: 9, f3: 13, f4: 20, spd: 1.4, yOff: 0.38, op: 0.6,  r: 0, g: 255, b: 160 },
-            { amp: 100, f1: 6, f2: 11, f3: 16, f4: 23, spd: 1.8, yOff: 0.52, op: 0.5,  r: 0, g: 180, b: 100 },
-            { amp: 200, f1: 3, f2: 5, f3: 8, f4: 13, spd: 0.7, yOff: 0.58, op: 0.7,  r: 10, g: 240, b: 140 },
-            { amp: 90,  f1: 8, f2: 13, f3: 21, f4: 34, spd: 2.2, yOff: 0.48, op: 0.35, r: 0, g: 200, b: 120 },
+            { amp: 180, f1: 4, f2: 7, f3: 11, f4: 17, spd: 1, yOff: 0.42, op: 0.85, r: 0, g: 220, b: 130 },
+            { amp: 140, f1: 5, f2: 9, f3: 13, f4: 20, spd: 1.4, yOff: 0.38, op: 0.6, r: 0, g: 255, b: 160 },
+            { amp: 100, f1: 6, f2: 11, f3: 16, f4: 23, spd: 1.8, yOff: 0.52, op: 0.5, r: 0, g: 180, b: 100 },
+            { amp: 200, f1: 3, f2: 5, f3: 8, f4: 13, spd: 0.7, yOff: 0.58, op: 0.7, r: 10, g: 240, b: 140 },
+            { amp: 90, f1: 8, f2: 13, f3: 21, f4: 34, spd: 2.2, yOff: 0.48, op: 0.35, r: 0, g: 200, b: 120 },
             { amp: 160, f1: 2, f2: 4, f3: 7, f4: 11, spd: 0.5, yOff: 0.65, op: 0.55, r: 5, g: 160, b: 90 },
         ];
 
@@ -112,7 +112,7 @@ export const EmeraldWaveAnimation: React.FC = () => {
                     Math.sin(nx * Math.PI * w.f4 - T * w.spd * 0.4) * w.amp * 0.15;
 
                 // SEAMLESS noise modulation via circular sampling
-                const noiseMod = seamlessNoise2D(t, nx * 3, w.yOff * 10 + wi * 7, 2, 3) * w.amp * 0.3;
+                const noiseMod = seamlessNoise2D(angle, nx * 3, w.yOff * 10 + wi * 7, 2, 3) * w.amp * 0.3;
 
                 const y = height * w.yOff + waveBase + noiseMod;
                 ctx.lineTo(x, y);
@@ -250,7 +250,7 @@ export const EmeraldWaveAnimation: React.FC = () => {
             for (let x = 0; x <= width; x += 3) {
                 const nx = x / width;
                 // SEAMLESS: circular noise sampling
-                const noiseY = seamlessNoise2D(t, nx * 4 + r * 3, r * 5, 2, 3) * ribbonAmp * 0.5;
+                const noiseY = seamlessNoise2D(angle, nx * 4 + r * 3, r * 5, 2, 3) * ribbonAmp * 0.5;
                 const waveY = Math.sin(nx * Math.PI * ribbonFreq + T * ribbonSpeed) * ribbonAmp + noiseY;
                 const y = ribbonY + waveY;
                 if (x === 0) ctx.moveTo(x, y);
@@ -365,7 +365,7 @@ export const EmeraldWaveAnimation: React.FC = () => {
 
             for (let s = 0; s < segments; s++) {
                 // SEAMLESS: use circular noise for direction
-                const noiseDir = seamlessNoise2D(t, curX * 0.003 + s * 0.1, curY * 0.003 + ti * 10, 2, 3) * Math.PI * 2;
+                const noiseDir = seamlessNoise2D(angle, curX * 0.003 + s * 0.1, curY * 0.003 + ti * 10, 2, 3) * Math.PI * 2;
                 const dir = baseAngle + noiseDir * 0.5 + Math.sin(T + s * 0.3) * 0.3;
                 curX += Math.cos(dir) * segLen;
                 curY += Math.sin(dir) * segLen;

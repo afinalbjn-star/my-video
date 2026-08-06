@@ -53,6 +53,12 @@ import {
     VIDEO_HEIGHT as LowPolyLoopHeight,
     VIDEO_WIDTH as LowPolyLoopWidth,
 } from './LowPolyLoop';
+import HackerAttackLoop, {
+    HACKER_ATTACK_DURATION_IN_FRAMES,
+    HACKER_ATTACK_FPS,
+    HACKER_ATTACK_HEIGHT,
+    HACKER_ATTACK_WIDTH,
+} from './HackerAttackLoop';
 import { VIDEO_CONFIG } from './index'; // VIDEO_CONFIG dari index untuk komposisi lain
 
 export const RemotionRoot: React.FC = () => {
@@ -385,6 +391,14 @@ export const RemotionRoot: React.FC = () => {
                 fps={LowPolyLoopFps}
                 width={LowPolyLoopWidth}
                 height={LowPolyLoopHeight}
+            />
+            <Composition
+                id="HackerAttackLoop"
+                component={HackerAttackLoop}
+                durationInFrames={HACKER_ATTACK_DURATION_IN_FRAMES}
+                fps={HACKER_ATTACK_FPS}
+                width={HACKER_ATTACK_WIDTH}
+                height={HACKER_ATTACK_HEIGHT}
             />
         </>
     );

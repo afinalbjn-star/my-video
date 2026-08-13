@@ -12,52 +12,12 @@ on:
         description: 'Pilih ID Komposisi yang ingin dirender'
         required: true
         options:
-          - DataMesh
-          - WinterSky
-          - RiverFlow
-          - RainbowLake
-          - SineWaveSilk
-          - TechBackground
-          - TechBackgroundComplex
-          - TechNexus
-          - MyVideo
-          - DarkWaves
-          - LakeSurface
-          - BioluminescentDeep
-          - CinematicWave
-          - InkBillow
-          - SilkWave
-          - LiquidMetal
-          - AuroraBorealis
-          - CosmicNebula
-          - CrystalRain
-          - PlasmaWave
-          - DeepOcean
-          - StarField
-          - MysticForest
-          - VolcanicGlass
-          - NebulaVortex
-          - QuantumField
-          - FractalDreams
-          - HyperDimensional
-          - ChromaticFluid
-          - MandelbrotPulse
-          - FlowField3D
-          - GeometricSacred
-          - QuantumEntanglement
-          - CelestialMechanic
-          - ParticleWave
-          - EmeraldWaveAnimation
-          - HolographicFoil
-          - HexagonWaveRipple
-          - AIBrainBackground
-          - LowPolyLoop
-          - HackerAttackLoop
-          - UnderwaterBubbles
+          - AbstractLoopBackground
+          - NeonCyberTerrain
       crf:
         description: 'Kualitas Video / CRF (0-51, makin rendah makin tajam, default: 16)'
         required: false
-        default: '16'
+        default: '10'
       bitrate:
         description: 'Bitrate (opsional, contoh: 20M. Jika diisi, CRF akan diabaikan oleh FFmpeg)'
         required: false
@@ -81,7 +41,7 @@ jobs:
 
       - name: Render Video
         run: |
-          COMP_ID="${{ github.event.inputs.compositionId || 'DataMesh' }}"
+          COMP_ID="${{ github.event.inputs.compositionId || 'AbstractLoopBackground' }}"
           CRF="${{ github.event.inputs.crf || '16' }}"
           BITRATE="${{ github.event.inputs.bitrate || '' }}"
           EXTRA_ARGS="--crf=$CRF"

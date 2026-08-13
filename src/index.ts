@@ -1,24 +1,11 @@
-export interface LiquidFilterProps {
-    baseFrequencyX: number;
-    baseFrequencyY: number;
-    numOctaves: number;
-    scale: number;
-    seed: number;
-}
+// =====================================================================================
+// index.ts
+// -------------------------------------------------------------------------------------
+// Titik masuk (entry point) proyek Remotion. File ini yang dipanggil oleh Remotion
+// Studio/CLI untuk memuat seluruh composition yang didaftarkan di Root.tsx.
+// =====================================================================================
 
-export interface WaveBackgroundProps {
-    imageSrc: string;
-    filterId: string;
-}
+import { registerRoot } from 'remotion';
+import { RemotionRoot } from './Root';
 
-export interface CompProps {
-    titleText: string;
-    titleColor: string;
-}
-
-export const VIDEO_CONFIG = {
-  width: 3840,
-  height: 2160,
-  fps: 60,
-  durationInFrames: 600, // 10 detik
-};
+registerRoot(RemotionRoot);

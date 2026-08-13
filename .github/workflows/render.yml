@@ -14,6 +14,7 @@ on:
         options:
           - AbstractLoopBackground
           - NeonCyberTerrain
+          - GoldenNetworkBackground
       crf:
         description: 'Kualitas Video / CRF (0-51, makin rendah makin tajam, default: 16)'
         required: false
@@ -41,7 +42,7 @@ jobs:
 
       - name: Render Video
         run: |
-          COMP_ID="${{ github.event.inputs.compositionId || 'AbstractLoopBackground' }}"
+          COMP_ID="${{ github.event.inputs.compositionId || 'GoldenNetworkBackground' }}"
           CRF="${{ github.event.inputs.crf || '16' }}"
           BITRATE="${{ github.event.inputs.bitrate || '' }}"
           EXTRA_ARGS="--crf=$CRF"

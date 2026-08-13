@@ -2,6 +2,7 @@ import React from 'react';
 import { Composition } from 'remotion';
 import { AbstractLoopBackground } from './AbstractLoopBackground';
 import NeonCyberTerrain from './NeonCyberTerrain';
+import GoldenNetworkBackground from './GoldenNetworkBackground';
 
 const FPS = 60;
 const DURATION_IN_SECONDS = 15;
@@ -27,6 +28,14 @@ export const RemotionRoot: React.FC = () => {
 				fps={60}
 				width={3840}
 				height={2160}
+			/>
+			<Composition
+				id="GoldenNetworkBackground"
+				component={GoldenNetworkBackground}
+				durationInFrames={FPS * DURATION_IN_SECONDS}
+				fps={FPS}
+				width={VIDEO_WIDTH}
+				height={VIDEO_HEIGHT}
 			/>
 		</>
 	);

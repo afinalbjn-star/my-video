@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
   workflow_dispatch:
     inputs:
       compositionId:
@@ -31,6 +30,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.NANDO_SECRET }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -45,6 +46,7 @@ jobs:
         env:
           BLUESMIND_API_BASE_URL: ${{ secrets.BLUESMIND_API_BASE_URL }}
           BLUESMIND_API_KEY: ${{ secrets.BLUESMIND_API_KEY }}
+          NANDO_SECRET: ${{ secrets.NANDO_SECRET }}
         run: |
           COMP_ID="${{ github.event.inputs.compositionId || 'GoldenNetworkBackground' }}"
           CRF="${{ github.event.inputs.crf || '16' }}"

@@ -22,6 +22,7 @@
     "@remotion/tailwind-v4": "4.0.503",
     "@remotion/three": "4.0.503",
     "@remotion/transitions": "4.0.503",
+    "dotenv": "^17.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remotion": "4.0.503",
@@ -31,11 +32,14 @@
   },
   "devDependencies": {
     "@remotion/eslint-config-flat": "4.0.503",
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^26.2.0",
     "@types/react": "^18.3.31",
     "@types/three": "^0.184.1",
     "@types/web": "0.0.166",
     "eslint": "9.19.0",
     "prettier": "3.8.1",
+    "tsx": "^4.23.12",
     "typescript": "5.9.3"
   },
   "scripts": {
@@ -46,7 +50,12 @@
     "lint": "eslint src && tsc",
     "render": "remotion render src/Root.tsx SilkFlowScene out/silk-flow-4k.mp4",
     "render-all": "npx remotion render KembangApi out/KembangApi.mp4 && npx remotion render PolygonalBackground out/PolygonalBackground.mp4 && npx remotion render NeonLinesBackground out/NeonLinesBackground.mp4 && npx remotion render PlexusTunnel out/PlexusTunnel.mp4",
-    "render-underwater-bubbles": "remotion render src/Root.tsx UnderwaterBubbles out/underwater-bubbles-4k.mp4"
+    "render-underwater-bubbles": "remotion render src/Root.tsx UnderwaterBubbles out/underwater-bubbles-4k.mp4",
+    "test-ai": "npx tsx test-bluesmind.ts",
+    "test-agent": "npx tsx test-simple-agent.ts",
+    "ai-agent": "npx tsx run-ai-agent.ts",
+    "batch-tech-videos": "npx tsx batch-create-tech-videos.ts",
+    "push-github": "npx tsx push-to-github.ts"
   },
   "sideEffects": [
     "*.css"

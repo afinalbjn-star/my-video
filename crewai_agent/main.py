@@ -10,7 +10,7 @@ from openai import OpenAI
 
 # --- PENyiapan ---
 # Ganti dengan kunci API OpenRouter Anda
-OPENROUTER_API_KEY = "sk-or-v1-PLACEHOLDER" 
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "ganti_dengan_kunci_api_openrouter_anda") 
 
 # Pilih model yang ingin Anda gunakan dari OpenRouter
 # Daftar model: https://openrouter.ai/models

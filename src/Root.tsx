@@ -7,6 +7,7 @@ import ProfessionalAbstractVideo from './ProfessionalAbstractVideo';
 import ProfessionalOceanWaves from './ProfessionalOceanWaves';
 import { MagicalTrainRide } from './MagicalTrainRide/MagicalTrainRide';
 import { ShuttlecockScene } from './ShuttlecockScene';
+import { KidsVideoMain } from './KidsVideo/KidsVideoMain';
 
 const FPS = 60;
 const DURATION_IN_SECONDS = 30;

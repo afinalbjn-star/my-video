@@ -37,7 +37,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/node": "^26.2.0",
     "@types/react": "^18.3.31",
-    "@types/react-dom": "^19.2.4",
+    "@types/react-dom": "^18.3.7",
     "@types/three": "^0.184.1",
     "@types/web": "0.0.166",
     "@types/webpack-node-externals": "^3.0.4",
@@ -60,6 +60,7 @@
     "test-multi-agent": "npx tsx test-multi-agent-system.ts",
     "test-fixes": "npx tsx test-fixes.ts",
     "diagnose-github": "npx tsx diagnose-github.ts",
+    "website": "npx tsx agent-chat-server.ts",
     "ai-agent": "npx tsx run-ai-agent.ts",
     "batch-tech-videos": "npx tsx batch-create-tech-videos.ts",
     "push-github": "npx tsx push-to-github.ts"

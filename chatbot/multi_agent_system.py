@@ -180,11 +180,11 @@ class CodeAgent(BaseAgent):
         messages = [
             {
                 "role": "system",
-                "content": f"Anda adalah code executor. Parse code yang di-generate dan berikan instruksi spesifik:\n1. File yang perlu dibuat/dimodifikasi\n2. Content yang perlu ditulis\n3. Format JSON\n\nWorking directory: {working_dir}"
+                "content": f"Anda adalah code executor. Parse code yang di-generate dan berikan instruksi spesifik. WAJIB HANYA merespon dalam format JSON seperti ini:\n{{\n  \"files\": [\n    {{\n      \"path\": \"path/ke/file.py\",\n      \"action\": \"create\",\n      \"content\": \"isi kode disini\"\n    }}\n  ]\n}}\nAction bisa 'create', 'modify', atau 'delete'. Working directory: {working_dir}"
             },
             {
                 "role": "user",
-                "content": f"Code:\n{code}\n\nParse dan berikan instruksi dalam format JSON."
+                "content": f"Code:\n{code}\n\nParse dan berikan instruksi HANYA dalam format JSON."
             }
         ]
         
@@ -192,7 +192,16 @@ class CodeAgent(BaseAgent):
         
         # Parse dan execute instructions
         try:
-            instructions = json.loads(response)
+            # Strip markdown json blocks if present
+            clean_response = response.strip()
+            if clean_response.startswith('```json'):
+                clean_response = clean_response[7:]
+            if clean_response.startswith('```'):
+                clean_response = clean_response[3:]
+            if clean_response.endswith('```'):
+                clean_response = clean_response[:-3]
+                
+            instructions = json.loads(clean_response.strip())
             execution_results = []
             
             for instruction in instructions.get('files', []):
@@ -495,11 +504,11 @@ class SelfImprovementAgent(BaseAgent):
         messages = [
             {
                 "role": "system",
-                "content": f"Anda adalah code implementer. Parse improvements dan berikan instruksi spesifik untuk implementasi. Working directory: {working_dir}"
+                "content": f"Anda adalah code implementer. Parse improvements dan berikan instruksi spesifik. WAJIB HANYA merespon dalam format JSON seperti ini:\n{{\n  \"files\": [\n    {{\n      \"path\": \"path/ke/file.py\",\n      \"action\": \"create\",\n      \"content\": \"isi kode disini\"\n    }}\n  ]\n}}\nAction bisa 'create', 'modify', atau 'delete'. Working directory: {working_dir}"
             },
             {
                 "role": "user",
-                "content": f"Improvements:\n{improvements}\n\nParse dan berikan instruksi implementasi dalam format JSON dengan fields: file_path, action (create/modify/delete), content."
+                "content": f"Improvements:\n{improvements}\n\nParse dan berikan instruksi HANYA dalam format JSON."
             }
         ]
         
@@ -507,7 +516,16 @@ class SelfImprovementAgent(BaseAgent):
         
         # Implement similar to CodeAgent
         try:
-            instructions = json.loads(response)
+            # Strip markdown json blocks if present
+            clean_response = response.strip()
+            if clean_response.startswith('```json'):
+                clean_response = clean_response[7:]
+            if clean_response.startswith('```'):
+                clean_response = clean_response[3:]
+            if clean_response.endswith('```'):
+                clean_response = clean_response[:-3]
+                
+            instructions = json.loads(clean_response.strip())
             implementation_results = []
             
             for instruction in instructions.get('files', []):
@@ -545,7 +563,7 @@ class CoordinatorAgent(BaseAgent):
         messages = [
             {
                 "role": "system",
-                "content": "Anda adalah task coordinator. Tentukan agent yang paling sesuai untuk task user. Pilihan: 'coder', 'searcher', 'analyzer', 'improver', 'remotion', 'github', 'planner', atau 'general'. Response dalam format JSON: {\"agent\": \"agent_name\", \"reasoning\": \"reasoning\"}"
+                "content": "Anda adalah task coordinator. Tentukan agent yang paling sesuai untuk task user. Pilihan: 'coder', 'searcher', 'analyzer', 'improver', 'remotion', 'github', 'planner', atau 'general'. WAJIB Response HANYA dalam format JSON: {\"agent\": \"agent_name\", \"reasoning\": \"reasoning\"}"
             },
             {
                 "role": "user",
@@ -556,23 +574,39 @@ class CoordinatorAgent(BaseAgent):
         response = await self.call_openai(messages)
         
         try:
-            result = json.loads(response)
+            # Strip markdown json blocks if present
+            clean_response = response.strip()
+            if clean_response.startswith('```json'):
+                clean_response = clean_response[7:]
+            if clean_response.startswith('```'):
+                clean_response = clean_response[3:]
+            if clean_response.endswith('```'):
+                clean_response = clean_response[:-3]
+                
+            result = json.loads(clean_response.strip())
+            
+            # Additional safety: force remotion if user clearly asks for it
+            msg_lower = user_message.lower()
+            if 'remotion' in msg_lower or 'buat video' in msg_lower or 'render' in msg_lower:
+                return {"agent": "remotion", "reasoning": "Forced Remotion override based on keywords"}
+                
             return result
         except json.JSONDecodeError:
             # Fallback based on keywords
-            if any(keyword in user_message.lower() for keyword in ['code', 'program', 'create file', 'modify', 'coding', 'implement']):
-                return {"agent": "coder", "reasoning": "Coding task detected"}
-            elif any(keyword in user_message.lower() for keyword in ['search', 'find', 'information', 'data', 'lookup']):
-                return {"agent": "searcher", "reasoning": "Search task detected"}
-            elif any(keyword in user_message.lower() for keyword in ['analyze', 'structure', 'directory', 'files']):
-                return {"agent": "analyzer", "reasoning": "Analysis task detected"}
-            elif any(keyword in user_message.lower() for keyword in ['improve', 'fix', 'optimize', 'better']):
-                return {"agent": "improver", "reasoning": "Improvement task detected"}
-            elif any(keyword in user_message.lower() for keyword in ['remotion', 'video', 'render video', 'buat video']):
+            msg_lower = user_message.lower()
+            if any(keyword in msg_lower for keyword in ['remotion', 'video', 'render', 'buat video']):
                 return {"agent": "remotion", "reasoning": "Remotion video task detected"}
-            elif any(keyword in user_message.lower() for keyword in ['github', 'push', 'render di github']):
-                return {"agent": "github", "reasoning": "GitHub push task detected"}
-            elif any(keyword in user_message.lower() for keyword in ['plan', 'rencanakan', 'langkah', 'arsitektur']):
+            elif any(keyword in msg_lower for keyword in ['github', 'push', 'commit']):
+                return {"agent": "github", "reasoning": "GitHub task detected"}
+            elif any(keyword in msg_lower for keyword in ['code', 'program', 'create file', 'modify', 'coding', 'implement', 'kode', 'koding']):
+                return {"agent": "coder", "reasoning": "Coding task detected"}
+            elif any(keyword in msg_lower for keyword in ['search', 'find', 'information', 'data', 'lookup', 'cari']):
+                return {"agent": "searcher", "reasoning": "Search task detected"}
+            elif any(keyword in msg_lower for keyword in ['analyze', 'structure', 'directory', 'files', 'analisa']):
+                return {"agent": "analyzer", "reasoning": "Analysis task detected"}
+            elif any(keyword in msg_lower for keyword in ['improve', 'fix', 'optimize', 'better', 'perbaiki']):
+                return {"agent": "improver", "reasoning": "Improvement task detected"}
+            elif any(keyword in msg_lower for keyword in ['plan', 'rencanakan', 'langkah', 'arsitektur']):
                 return {"agent": "planner", "reasoning": "Planning task detected"}
             else:
                 return {"agent": "general", "reasoning": "General task"}

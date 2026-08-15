@@ -9,3 +9,7 @@ out
 # Keep .env.example but ignore actual .env files
 .env.local
 .env.*.local
+
+# Python caches
+__pycache__/
+*.pyc

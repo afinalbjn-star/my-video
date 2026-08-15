@@ -7,7 +7,7 @@ app = Flask(__name__, static_folder='static', template_folder='.')
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret')   # untuk session
 
 # Konfigurasi OpenRouter
-OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', 'sk-or-v1-PLACEHOLDER')
+OPENROUTER_API_KEY = os.environ.get('OPENROUTER_API_KEY', 'ganti_dengan_kunci_api_openrouter_anda')
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 @app.route('/')

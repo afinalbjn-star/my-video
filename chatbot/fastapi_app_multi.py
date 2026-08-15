@@ -31,7 +31,7 @@ app.add_middleware(
 )
 
 # Configuration
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "sk-or-v1-PLACEHOLDER")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "ganti_dengan_kunci_api_openrouter_anda")
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)

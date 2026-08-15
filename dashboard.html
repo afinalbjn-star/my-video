@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Video Factory Dashboard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #f8fafc; padding: 2rem; margin: 0; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    h1 { margin-top: 0; color: #38bdf8; text-align: center; }
+    input, button { padding: 12px; margin: 8px 0; width: 100%; box-sizing: border-box; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 16px; }
+    input:focus { outline: none; border-color: #38bdf8; }
+    button { background: #0284c7; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #0369a1; }
+    #log { background: #000; padding: 1rem; height: 200px; overflow-y: auto; font-family: monospace; white-space: pre-wrap; margin-top: 1rem; border-radius: 6px; border: 1px solid #334155; color: #10b981; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎬 AI Video Factory</h1>
+      <p style="text-align: center; color: #94a3b8; margin-bottom: 2rem;">Masukkan prompt untuk membuat video Remotion secara otonom.</p>
+      
+      <input id="prompt" type="text" placeholder="Contoh: Buatkan video 15 detik tentang AI di tahun 2026 bergaya Cyberpunk" />
+      <button onclick="start()">🚀 Generate Video</button>
+      
+      <div id="log">Sistem siap. Menunggu perintah...</div>
+    </div>
+  </div>
+  <script>
+    async function start() {
+      const prompt = document.getElementById('prompt').value;
+      const logEl = document.getElementById('log');
+      
+      if (!prompt) {
+        logEl.innerHTML = '⚠️ Mohon masukkan prompt video terlebih dahulu.';
+        return;
+      }
+      
+      logEl.innerHTML = '⚙️ Memulai AI Agent...\n';
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await res.json();
+        logEl.innerHTML += `✅ Status: ${data.message}\n\nSilakan cek terminal server (VSCode/Command Prompt) untuk melihat log lengkap yang sedang berjalan. Setelah selesai, proses render otomatis dijalankan di GitHub Actions!`;
+      } catch (e) {
+        logEl.innerHTML += '❌ Error: ' + e;
+      }
+    }
+  </script>
+</body>
+</html>

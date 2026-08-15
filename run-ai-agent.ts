@@ -5,16 +5,38 @@
 
 import 'dotenv/config';
 import { AIAgentController } from './src/agent/agent-controller';
+import * as readline from 'readline';
+
+async function askQuestion(query: string): Promise<string> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  return new Promise(resolve => rl.question(query, ans => {
+    rl.close();
+    resolve(ans);
+  }));
+}
 
 async function main() {
   // Get prompt from command line
-  const prompt = process.argv[2];
+  let prompt = process.argv[2];
   
   if (!prompt) {
-    console.error('❌ Error: Please provide a video prompt');
-    console.log('Usage: npx tsx run-ai-agent.ts "your video prompt"');
-    console.log('Example: npx tsx run-ai-agent.ts "Create a 30-second kinetic typography video about AI technology"');
-    process.exit(1);
+    console.log('🌟 Selamat datang di AI Agent CLI Wizard!');
+    console.log('Mari kita rancang video Anda bersama-sama.\n');
+    
+    const concept = await askQuestion('📝 Topik/Konsep video (misal: Promosi sepatu lari): ');
+    const duration = await askQuestion('⏱️ Durasi video (dalam detik, misal: 30): ');
+    const style = await askQuestion('🎨 Gaya visual (misal: Cyberpunk, Minimalist, Colorful): ');
+    
+    if (!concept) {
+      console.error('❌ Error: Konsep video tidak boleh kosong.');
+      process.exit(1);
+    }
+    
+    prompt = `Create a ${duration || '15'}-second ${style || 'modern'} video about ${concept}`;
+    console.log(`\n✨ Prompt akhir: "${prompt}"\n`);
   }
 
   // Check environment variables

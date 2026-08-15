@@ -34,6 +34,14 @@ Buat atau update file `.env`:
 BLUESMIND_API_BASE_URL=https://api.bluesminds.com/v1
 BLUESMIND_API_KEY=sk-your_bluesmind_api_key_here
 
+# Optional: tuning untuk API yang sering 504/timeout
+BLUESMIND_TIMEOUT_MS=120000
+BLUESMIND_RETRY_BASE_DELAY_MS=4000
+BLUESMIND_RETRY_MAX_DELAY_MS=90000
+BLUESMIND_GATEWAY_RETRIES_PER_MODEL=2
+BLUESMIND_PRIMARY_MODEL=meta/llama-3.3-70b-instruct
+BLUESMIND_FALLBACK_MODEL=meta/llama-3.1-8b-instruct
+
 # GitHub Configuration
 GITHUB_TOKEN=ghp_your_github_token_here
 GITHUB_USERNAME=your_github_username
@@ -125,9 +133,9 @@ await this.gitOps.completeWorkflow(commitMessage, 'feature/ai-video');
 
 Untuk menggunakan model Bluesmind berbeda:
 
-```typescript
-// Di bluesmind.ts
-const DEFAULT_MODEL = 'meta/llama-3.1-405b-instruct'; // atau model lain
+```env
+BLUESMIND_PRIMARY_MODEL=meta/llama-3.3-70b-instruct
+BLUESMIND_FALLBACK_MODEL=meta/llama-3.1-8b-instruct
 ```
 
 ### Component Customization
@@ -170,6 +178,10 @@ npm run ai-agent "Test prompt for AI agent"
 
 **Error**: `Invalid token`
 - **Solution**: Cek API key di `.env` dan pastikan valid
+
+**Error**: `API Error: 504 - Gateway Time-out`
+- **Meaning**: Gateway/proxy Bluesmind tidak mendapat respons model tepat waktu. Ini biasanya overload atau model terlalu berat untuk request saat itu.
+- **Solution**: Client sudah otomatis retry, menghormati `Retry-After`, dan fallback ke model lebih ringan. Jika masih sering terjadi, naikkan `BLUESMIND_TIMEOUT_MS`, turunkan `BLUESMIND_GATEWAY_RETRIES_PER_MODEL`, atau jadikan model 8B sebagai `BLUESMIND_PRIMARY_MODEL` sementara.
 
 ### Git Push Failed
 

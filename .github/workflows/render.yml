@@ -7,18 +7,13 @@ on:
   workflow_dispatch:
     inputs:
       compositionId:
-        type: choice
-        description: 'Pilih ID Komposisi yang ingin dirender'
-        required: true
-        options:
-          - AbstractLoopBackground
-          - NeonCyberTerrain
-          - GoldenNetworkBackground
-          - ProfessionalAbstractVideo
+        description: 'ID Komposisi yang ingin dirender (kosongkan untuk auto-detect dari Root.tsx)'
+        required: false
+        default: ''
       crf:
         description: 'Kualitas Video / CRF (0-51, makin rendah makin tajam, default: 16)'
         required: false
-        default: '10'
+        default: '16'
       bitrate:
         description: 'Bitrate (opsional, contoh: 20M. Jika diisi, CRF akan diabaikan oleh FFmpeg)'
         required: false
@@ -42,22 +37,43 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Render Video
+      - name: Detect and render compositions
         env:
           BLUESMIND_API_BASE_URL: ${{ secrets.BLUESMIND_API_BASE_URL }}
           BLUESMIND_API_KEY: ${{ secrets.BLUESMIND_API_KEY }}
           NANDO_SECRET: ${{ secrets.NANDO_SECRET }}
         run: |
-          COMP_ID="${{ github.event.inputs.compositionId || 'GoldenNetworkBackground' }}"
           CRF="${{ github.event.inputs.crf || '16' }}"
           BITRATE="${{ github.event.inputs.bitrate || '' }}"
           EXTRA_ARGS="--crf=$CRF"
           if [ -n "$BITRATE" ]; then EXTRA_ARGS="--bitrate=$BITRATE"; fi
-          echo "COMP_ID=$COMP_ID" >> $GITHUB_ENV
-          npx remotion render src/entry.tsx "$COMP_ID" "out/$COMP_ID.mp4" $EXTRA_ARGS --timeout=120000
 
-      - name: Upload Video
+          # If a specific compositionId is given, render just that one
+          MANUAL_COMP="${{ github.event.inputs.compositionId }}"
+          if [ -n "$MANUAL_COMP" ]; then
+            echo "Rendering specified composition: $MANUAL_COMP"
+            npx remotion render src/entry.tsx "$MANUAL_COMP" "out/$MANUAL_COMP.mp4" $EXTRA_ARGS --timeout=120000
+            echo "COMP_IDS=$MANUAL_COMP" >> $GITHUB_ENV
+          else
+            # Auto-detect all compositions from Root.tsx
+            echo "Auto-detecting compositions from Root.tsx..."
+            COMP_LIST=$(npx remotion compositions src/entry.tsx --props='{}' 2>/dev/null | grep -oP '(?<=id: ")[^"]+' || echo "")
+            if [ -z "$COMP_LIST" ]; then
+              echo "No compositions detected, using GoldenNetworkBackground as fallback"
+              COMP_LIST="GoldenNetworkBackground"
+            fi
+            echo "Found compositions: $COMP_LIST"
+            RENDERED_IDS=""
+            for COMP_ID in $COMP_LIST; do
+              echo "Rendering: $COMP_ID"
+              npx remotion render src/entry.tsx "$COMP_ID" "out/$COMP_ID.mp4" $EXTRA_ARGS --timeout=120000 || echo "Failed to render $COMP_ID, skipping..."
+              RENDERED_IDS="$RENDERED_IDS $COMP_ID"
+            done
+            echo "COMP_IDS=$RENDERED_IDS" >> $GITHUB_ENV
+          fi
+
+      - name: Upload Videos
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.COMP_ID }}
-          path: out/${{ env.COMP_ID }}.mp4
+          name: rendered-videos-${{ github.run_number }}
+          path: out/*.mp4

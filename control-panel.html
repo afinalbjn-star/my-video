@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Agent Control Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0b0f;
+      --bg-sidebar: #0f1117;
+      --bg-card: #13151d;
+      --bg-input: #1a1d27;
+      --bg-hover: #1e2130;
+      --bg-message-user: #1a2e4a;
+      --bg-message-ai: #13151d;
+      --border: rgba(255,255,255,0.07);
+      --text-primary: #f0f2f8;
+      --text-secondary: #7d8499;
+      --text-muted: #4a4f64;
+      --accent-blue: #3b82f6;
+      --accent-purple: #8b5cf6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --glow: rgba(59, 130, 246, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem 0;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 1.25rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .logo-text { font-weight: 700; font-size: 15px; }
+    .logo-sub { font-size: 10px; color: var(--text-muted); letter-spacing: 0.05em; }
+
+    .sidebar-section { padding: 0 0.75rem; margin-bottom: 1.5rem; }
+    .sidebar-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      color: var(--text-muted); text-transform: uppercase;
+      padding: 0 0.5rem; margin-bottom: 0.5rem;
+    }
+
+    .mode-btn {
+      display: flex; align-items: center; gap: 10px;
+      width: 100%; padding: 9px 12px;
+      background: none; border: none; cursor: pointer;
+      border-radius: 8px; color: var(--text-secondary);
+      font-family: 'Inter', sans-serif; font-size: 13.5px;
+      transition: all 0.15s ease; text-align: left;
+    }
+    .mode-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .mode-btn.active { background: var(--glow); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.2); }
+    .mode-btn .icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+
+    .new-chat-btn {
+      margin: 0 0.75rem 1rem;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border: none; border-radius: 10px;
+      color: white; font-family: 'Inter', sans-serif;
+      font-size: 13.5px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .new-chat-btn:hover { opacity: 0.9; }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      padding: 1rem 1.25rem 0;
+      border-top: 1px solid var(--border);
+    }
+    .status-pill {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    
+    /* Multi-Agent System UI */
+    .multi-agent-toggle {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .multi-agent-toggle:hover { border-color: var(--accent-blue); }
+    .multi-agent-toggle.active { 
+      background: rgba(59,130,246,0.1); 
+      border-color: var(--accent-blue); 
+    }
+    .toggle-switch {
+      width: 36px; height: 20px; background: var(--bg-hover);
+      border-radius: 10px; position: relative; transition: background 0.2s;
+    }
+    .toggle-switch.active { background: var(--accent-blue); }
+    .toggle-knob {
+      width: 16px; height: 16px; background: white;
+      border-radius: 50%; position: absolute;
+      top: 2px; left: 2px; transition: transform 0.2s;
+    }
+    .toggle-switch.active .toggle-knob { transform: translateX(16px); }
+    
+    .agent-status-panel {
+      display: none; padding: 1rem; margin-top: 1rem;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .agent-status-panel.visible { display: block; }
+    .agent-status-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+    }
+    .agent-status-item:last-child { border-bottom: none; }
+    .agent-name { font-size: 13px; font-weight: 500; }
+    .agent-metrics { font-size: 11px; color: var(--text-muted); }
+    .agent-indicator {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--text-muted);
+    }
+    .agent-indicator.active { background: var(--accent-green); }
+    .agent-indicator.busy { background: var(--accent-amber); }
+    
+    .performance-bar {
+      height: 4px; background: var(--bg-hover);
+      border-radius: 2px; overflow: hidden; margin-top: 4px;
+    }
+    .performance-fill {
+      height: 100%; background: var(--accent-blue);
+      border-radius: 2px; transition: width 0.3s;
+    }
+
+    /* ── MAIN AREA ── */
+    .main {
+      flex: 1; display: flex; flex-direction: column;
+      height: 100vh; overflow: hidden;
+    }
+
+    /* Header */
+    .chat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-base);
+    }
+    .chat-title { font-size: 15px; font-weight: 600; }
+    .chat-mode-badge {
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      background: rgba(59,130,246,0.15); color: var(--accent-blue);
+      border: 1px solid rgba(59,130,246,0.2);
+    }
+
+    /* Chat messages */
+    .chat-body {
+      flex: 1; overflow-y: auto;
+      padding: 1.5rem;
+      scroll-behavior: smooth;
+    }
+    .chat-body::-webkit-scrollbar { width: 4px; }
+    .chat-body::-webkit-scrollbar-track { background: transparent; }
+    .chat-body::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 4px; }
+
+    .message-row {
+      display: flex; gap: 12px;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.3s ease;
+    }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
+
+    .avatar {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0; margin-top: 2px;
+    }
+    .avatar.ai { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); }
+    .avatar.user { background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); }
+
+    .message-content { flex: 1; max-width: 85%; }
+    .message-name {
+      font-size: 11px; font-weight: 600;
+      color: var(--text-muted); margin-bottom: 5px;
+    }
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px; line-height: 1.65;
+      border: 1px solid var(--border);
+    }
+    .message-bubble.ai { background: var(--bg-card); color: var(--text-primary); }
+    .message-bubble.user { background: var(--bg-message-user); color: var(--text-primary); }
+
+    /* Markdown-like rendering */
+    .message-bubble code {
+      background: rgba(255,255,255,0.07);
+      padding: 1px 5px; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px; color: var(--accent-cyan);
+    }
+    .message-bubble pre {
+      background: #0d0f1a; border-radius: 8px;
+      padding: 12px 14px; margin: 8px 0;
+      overflow-x: auto; border: 1px solid var(--border);
+    }
+    .message-bubble pre code { background: none; padding: 0; color: #7dd3fc; font-size: 13px; }
+    .message-bubble strong { color: white; font-weight: 600; }
+    .message-bubble em { color: var(--text-secondary); }
+    .message-bubble h1,h2,h3 { color: white; margin: 8px 0 4px; }
+    .message-bubble ul,ol { padding-left: 18px; margin: 6px 0; }
+    .message-bubble li { margin: 3px 0; }
+    .message-bubble p { margin-bottom: 6px; }
+
+    .mode-tag {
+      display: inline-block;
+      font-size: 10px; font-weight: 600;
+      padding: 2px 7px; border-radius: 10px;
+      margin-bottom: 5px;
+    }
+
+    /* Video task notification */
+    .video-notification {
+      background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 10px; padding: 12px 16px;
+      margin-top: 8px; font-size: 13px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .video-notification .spin { animation: spin 1.2s linear infinite; display: inline-block; }
+    @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex; align-items: center; gap: 4px;
+      padding: 14px 16px; background: var(--bg-card);
+      border-radius: 12px; border: 1px solid var(--border);
+      width: fit-content;
+    }
+    .typing-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-muted);
+      animation: typing-bounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-bounce { 0%,80%,100%{transform:scale(0.6)} 40%{transform:scale(1)} }
+
+    /* Quick suggestions */
+    .suggestions {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 0 1.5rem 1rem;
+    }
+    .suggestion-chip {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-secondary);
+      font-size: 12.5px; cursor: pointer;
+      transition: all 0.15s ease; white-space: nowrap;
+    }
+    .suggestion-chip:hover {
+      border-color: rgba(59,130,246,0.4);
+      color: var(--accent-blue); background: var(--glow);
+    }
+
+    /* Input Area */
+    .chat-input-area {
+      padding: 1rem 1.5rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg-base);
+    }
+    .input-wrapper {
+      display: flex; align-items: flex-end; gap: 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 10px 12px;
+      transition: border-color 0.2s;
+    }
+    .input-wrapper:focus-within {
+      border-color: rgba(59,130,246,0.5);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.07);
+    }
+    #userInput {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text-primary); font-family: 'Inter', sans-serif;
+      font-size: 14px; resize: none; max-height: 160px;
+      line-height: 1.5;
+    }
+    #userInput::placeholder { color: var(--text-muted); }
+    .send-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border: none; cursor: pointer; color: white;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 16px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .send-btn:hover { opacity: 0.9; }
+    .send-btn:active { transform: scale(0.95); }
+    .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    
+    .mic-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--bg-hover);
+      border: 1px solid var(--border);
+      cursor: pointer; color: var(--text-secondary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 16px;
+      transition: all 0.2s;
+    }
+    .mic-btn:hover { 
+      background: var(--glow); 
+      color: var(--accent-blue);
+      border-color: rgba(59,130,246,0.3);
+    }
+    .mic-btn.recording {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      border-color: #ef4444;
+      animation: pulse-recording 1.5s infinite;
+    }
+    @keyframes pulse-recording {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+    }
+    .input-hint {
+      font-size: 11px; color: var(--text-muted);
+      margin-top: 6px; padding: 0 4px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+    }
+    .empty-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      border-radius: 22px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; margin-bottom: 1.5rem;
+      box-shadow: 0 8px 32px rgba(59,130,246,0.25);
+    }
+    .empty-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .empty-sub { font-size: 14px; color: var(--text-secondary); line-height: 1.6; max-width: 400px; }
+
+    .quick-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-top: 2rem; width: 100%; max-width: 480px;
+    }
+    .quick-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px;
+      cursor: pointer; text-align: left;
+      transition: all 0.15s ease;
+    }
+    .quick-card:hover {
+      border-color: rgba(59,130,246,0.35);
+      background: var(--bg-hover);
+    }
+    .quick-card-icon { font-size: 20px; margin-bottom: 6px; }
+    .quick-card-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+    .quick-card-desc { font-size: 11.5px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🤖</div>
+    <div>
+      <div class="logo-text">AI Agent</div>
+      <div class="logo-sub">Control Panel</div>
+    </div>
+  </div>
+
+  <button class="new-chat-btn" onclick="newChat()">
+    ✦ Obrolan Baru
+  </button>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">Mode Asisten</div>
+    <button class="mode-btn active" id="mode-general" onclick="setMode('general')">
+      <div class="icon" style="background:rgba(59,130,246,0.15);">💬</div>
+      Umum (General)
+    </button>
+    <button class="mode-btn" id="mode-video" onclick="setMode('video')">
+      <div class="icon" style="background:rgba(139,92,246,0.15);">🎬</div>
+      Buat Video
+    </button>
+    <button class="mode-btn" id="mode-script" onclick="setMode('script')">
+      <div class="icon" style="background:rgba(16,185,129,0.15);">📝</div>
+      Tulis Skrip / Konten
+    </button>
+    <button class="mode-btn" id="mode-research" onclick="setMode('research')">
+      <div class="icon" style="background:rgba(245,158,11,0.15);">🔍</div>
+      Riset & Fakta
+    </button>
+    <button class="mode-btn" id="mode-code" onclick="setMode('code')">
+      <div class="icon" style="background:rgba(6,182,212,0.15);">💻</div>
+      Bantu Koding
+    </button>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="multi-agent-toggle" id="multiAgentToggle" onclick="toggleMultiAgent()">
+      <div class="toggle-switch" id="toggleSwitch">
+        <div class="toggle-knob"></div>
+      </div>
+      <span style="font-size: 12px; font-weight: 500;">Multi-Agent System</span>
+    </div>
+    
+    <div class="agent-status-panel" id="agentStatusPanel">
+      <div style="font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">
+        AGENT STATUS
+      </div>
+      <div id="agentStatusList">
+        <!-- Agent status will be populated here -->
+      </div>
+      <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border);">
+        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">System Performance</div>
+        <div class="performance-bar">
+          <div class="performance-fill" id="systemPerformanceBar" style="width: 0%"></div>
+        </div>
+        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;" id="systemPerformanceText">0%</div>
+      </div>
+    </div>
+    
+    <div class="status-pill" style="margin-top: 1rem;">
+      <div class="status-dot"></div>
+      AI Agent Online
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main" id="mainArea">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <span class="chat-title" id="chatTitle">Asisten AI Anda</span>
+    <span class="chat-mode-badge" id="modeBadge">💬 Mode Umum</span>
+  </div>
+
+  <!-- Empty State (tampil saat belum ada chat) -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🤖</div>
+    <div class="empty-title">Halo! Saya siap membantu</div>
+    <div class="empty-sub">Tanya apa saja, minta saya membuat video, menulis skrip konten, riset topik, atau bantu koding.</div>
+    <div class="quick-grid">
+      <div class="quick-card" onclick="quickSend('Buatkan skrip YouTube 5 menit tentang tips produktivitas')">
+        <div class="quick-card-icon">📝</div>
+        <div class="quick-card-title">Tulis Skrip YouTube</div>
+        <div class="quick-card-desc">Tips produktivitas 5 menit</div>
+      </div>
+      <div class="quick-card" onclick="quickSend('Buatkan video animasi background cyberpunk 4K 15 detik untuk Adobe Stock')">
+        <div class="quick-card-icon">🎬</div>
+        <div class="quick-card-title">Buat Video Animasi</div>
+        <div class="quick-card-desc">Cyberpunk 4K untuk Adobe Stock</div>
+      </div>
+      <div class="quick-card" onclick="quickSend('Carikan 5 ide konten viral untuk TikTok tentang teknologi AI')">
+        <div class="quick-card-icon">🔍</div>
+        <div class="quick-card-title">Ide Konten Viral</div>
+        <div class="quick-card-desc">5 ide TikTok teknologi AI</div>
+      </div>
+      <div class="quick-card" onclick="quickSend('Buatkan caption Instagram yang menarik untuk foto produk kopi premium')">
+        <div class="quick-card-icon">📸</div>
+        <div class="quick-card-title">Caption Instagram</div>
+        <div class="quick-card-desc">Produk kopi premium</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-body" id="chatBody" style="display:none;"></div>
+
+  <!-- Suggestions -->
+  <div class="suggestions" id="suggestions" style="display:none;">
+    <span class="suggestion-chip" onclick="quickSend('Lanjutkan dan buat lebih detail')">✦ Buat lebih detail</span>
+    <span class="suggestion-chip" onclick="quickSend('Buatkan versi yang lebih pendek')">✂️ Versi lebih pendek</span>
+    <span class="suggestion-chip" onclick="quickSend('Ubah gaya penulisannya menjadi lebih santai')">😊 Gaya santai</span>
+    <span class="suggestion-chip" onclick="quickSend('Tambahkan contoh-contoh konkret')">📌 Tambah contoh</span>
+  </div>
+
+  <!-- Input Area -->
+  <div class="chat-input-area">
+    <div class="input-wrapper">
+      <textarea
+        id="userInput"
+        rows="1"
+        placeholder="Ketik perintah atau pertanyaan Anda..."
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <button class="mic-btn" id="micBtn" onclick="toggleRecording()" title="Voice Input">🎤</button>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">▶</button>
+    </div>
+    <div class="input-hint">Enter untuk kirim &nbsp;·&nbsp; Shift+Enter untuk baris baru &nbsp;·&nbsp; Mode otomatis terdeteksi &nbsp;·&nbsp; 🎤 Voice input</div>
+  </div>
+</main>
+
+<script>
+  let currentMode = 'general';
+  let sessionId = 'session-' + Date.now();
+  let isLoading = false;
+  let messageCount = 0;
+  let isRecording = false;
+  let recognition = null;
+  let multiAgentEnabled = false;
+  let systemStatusInterval = null;
+
+  // Initialize Speech Recognition
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'id-ID'; // Default to Indonesian
+
+    recognition.onstart = () => {
+      isRecording = true;
+      document.getElementById('micBtn').classList.add('recording');
+      document.getElementById('micBtn').title = 'Stop Recording';
+    };
+
+    recognition.onend = () => {
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('micBtn').title = 'Voice Input';
+    };
+
+    recognition.onresult = (event) => {
+      const input = document.getElementById('userInput');
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        input.value = finalTranscript;
+        autoResize(input);
+      } else if (interimTranscript) {
+        input.value = interimTranscript;
+        autoResize(input);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('micBtn').title = 'Voice Input';
+      
+      if (event.error === 'not-allowed') {
+        alert('Microphone access denied. Please allow microphone access to use voice input.');
+      }
+    };
+  } else {
+    console.warn('Speech recognition not supported in this browser');
+    document.getElementById('micBtn').style.display = 'none';
+  }
+
+  function toggleRecording() {
+    if (!recognition) {
+      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    if (isRecording) {
+      recognition.stop();
+    } else {
+      recognition.start();
+    }
+  }
+
+  function toggleMultiAgent() {
+    multiAgentEnabled = !multiAgentEnabled;
+    const toggleSwitch = document.getElementById('toggleSwitch');
+    const agentStatusPanel = document.getElementById('agentStatusPanel');
+    
+    toggleSwitch.classList.toggle('active', multiAgentEnabled);
+    agentStatusPanel.classList.toggle('visible', multiAgentEnabled);
+    
+    if (multiAgentEnabled) {
+      startSystemStatusMonitoring();
+    } else {
+      stopSystemStatusMonitoring();
+    }
+  }
+
+  async function fetchSystemStatus() {
+    try {
+      const res = await fetch('/api/system-status');
+      const data = await res.json();
+      updateAgentStatusUI(data);
+      return data;
+    } catch (err) {
+      console.error('Failed to fetch system status:', err);
+      return null;
+    }
+  }
+
+  function updateAgentStatusUI(status) {
+    if (!status) return;
+    
+    const agentStatusList = document.getElementById('agentStatusList');
+    const systemPerformanceBar = document.getElementById('systemPerformanceBar');
+    const systemPerformanceText = document.getElementById('systemPerformanceText');
+    
+    // Update agent status
+    if (status.agentPerformance) {
+      agentStatusList.innerHTML = Object.entries(status.agentPerformance).map(([role, data]) => {
+        const isActive = data.isActive;
+        const performance = data.performance;
+        const completedTasks = performance.completedTasks;
+        const avgResponseTime = Math.round(performance.averageResponseTime);
+        
+        return `
+          <div class="agent-status-item">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="agent-indicator ${isActive ? 'active' : ''}"></div>
+              <div>
+                <div class="agent-name">${role.charAt(0).toUpperCase() + role.slice(1)}</div>
+                <div class="agent-metrics">${completedTasks} tasks · ${avgResponseTime}ms avg</div>
+              </div>
+            </div>
+            <div class="agent-metrics">${isActive ? 'Active' : 'Idle'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // Update system performance
+    if (status.systemMetrics) {
+      const healthScore = Math.round(100 - (status.systemMetrics.systemLoad * 30) - (status.systemMetrics.errorRate * 100));
+      const performance = Math.max(0, Math.min(100, healthScore));
+      
+      systemPerformanceBar.style.width = `${performance}%`;
+      systemPerformanceBar.style.background = performance > 70 ? 'var(--accent-green)' : 
+                                          performance > 40 ? 'var(--accent-amber)' : 'var(--accent-pink)';
+      systemPerformanceText.textContent = `${performance}% Health`;
+    }
+  }
+
+  function startSystemStatusMonitoring() {
+    fetchSystemStatus(); // Initial fetch
+    systemStatusInterval = setInterval(fetchSystemStatus, 5000); // Update every 5 seconds
+  }
+
+  function stopSystemStatusMonitoring() {
+    if (systemStatusInterval) {
+      clearInterval(systemStatusInterval);
+      systemStatusInterval = null;
+    }
+  }
+
+  const modeConfig = {
+    general: { label: '💬 Mode Umum', title: 'Asisten AI Anda' },
+    video: { label: '🎬 Mode Video', title: 'Pembuat Video Remotion' },
+    script: { label: '📝 Mode Skrip', title: 'Penulis Konten Profesional' },
+    research: { label: '🔍 Mode Riset', title: 'Peneliti & Analis Konten' },
+    code: { label: '💻 Mode Koding', title: 'Developer AI Assistant' },
+  };
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('mode-' + mode).classList.add('active');
+    document.getElementById('modeBadge').textContent = modeConfig[mode].label;
+    document.getElementById('chatTitle').textContent = modeConfig[mode].title;
+  }
+
+  function newChat() {
+    sessionId = 'session-' + Date.now();
+    messageCount = 0;
+    document.getElementById('chatBody').innerHTML = '';
+    document.getElementById('chatBody').style.display = 'none';
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('suggestions').style.display = 'none';
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function quickSend(text) {
+    document.getElementById('userInput').value = text;
+    sendMessage();
+  }
+
+  function appendMessage(role, content, mode, isVideoTask) {
+    const chatBody = document.getElementById('chatBody');
+    const emptyState = document.getElementById('emptyState');
+    const suggestions = document.getElementById('suggestions');
+
+    if (emptyState.style.display !== 'none') {
+      emptyState.style.display = 'none';
+      chatBody.style.display = 'block';
+    }
+
+    const modeColors = {
+      general: '#3b82f6', video: '#8b5cf6',
+      script: '#10b981', research: '#f59e0b', code: '#06b6d4'
+    };
+    const modeLabels = {
+      general: '💬 Umum', video: '🎬 Video',
+      script: '📝 Skrip', research: '🔍 Riset', code: '💻 Kode'
+    };
+
+    const row = document.createElement('div');
+    row.className = 'message-row';
+
+    const avatarIcon = role === 'ai' ? '🤖' : '👤';
+    const avatarClass = role === 'ai' ? 'ai' : 'user';
+    const bubbleClass = role === 'ai' ? 'ai' : 'user';
+    const name = role === 'ai' ? 'AI Agent' : 'Anda';
+    const modeTag = mode ? `<span class="mode-tag" style="background:${modeColors[mode]}20;color:${modeColors[mode]};border:1px solid ${modeColors[mode]}30">${modeLabels[mode] || mode}</span><br>` : '';
+
+    const formattedContent = formatMarkdown(content);
+
+    let videoNotif = '';
+    if (isVideoTask) {
+      videoNotif = `<div class="video-notification">
+        <span class="spin">⚙️</span>
+        <span>AI Agent Video sedang bekerja di background! Cek tab <strong>Actions</strong> di GitHub Anda setelah selesai untuk mengunduh hasilnya.</span>
+      </div>`;
+    }
+
+    row.innerHTML = `
+      <div class="avatar ${avatarClass}">${avatarIcon}</div>
+      <div class="message-content">
+        <div class="message-name">${name}</div>
+        ${role === 'ai' ? modeTag : ''}
+        <div class="message-bubble ${bubbleClass}">${formattedContent}</div>
+        ${isVideoTask ? videoNotif : ''}
+      </div>`;
+
+    chatBody.appendChild(row);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    messageCount++;
+
+    if (messageCount >= 2) suggestions.style.display = 'flex';
+  }
+
+  function formatMarkdown(text) {
+    return text
+      .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function showTyping() {
+    const chatBody = document.getElementById('chatBody');
+    const emptyState = document.getElementById('emptyState');
+    if (emptyState.style.display !== 'none') {
+      emptyState.style.display = 'none';
+      chatBody.style.display = 'block';
+    }
+    const div = document.createElement('div');
+    div.id = 'typingIndicator';
+    div.className = 'message-row';
+    div.innerHTML = `
+      <div class="avatar ai">🤖</div>
+      <div class="message-content">
+        <div class="message-name">AI Agent</div>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      </div>`;
+    chatBody.appendChild(div);
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  async function sendMessage() {
+    if (isLoading) return;
+    const input = document.getElementById('userInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    isLoading = true;
+    document.getElementById('sendBtn').disabled = true;
+
+    appendMessage('user', message, null, false);
+    showTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, sessionId, mode: currentMode === 'general' ? undefined : currentMode })
+      });
+      const data = await res.json();
+      removeTyping();
+
+      if (data.mode && data.mode !== currentMode && currentMode === 'general') {
+        setMode(data.mode);
+      }
+
+      appendMessage('ai', data.text || data.error || 'Tidak ada respons', data.mode, data.isVideoTask);
+    } catch (err) {
+      removeTyping();
+      appendMessage('ai', '❌ Gagal terhubung ke server. Pastikan server berjalan dengan `npx tsx server.ts`', 'general', false);
+    }
+
+    isLoading = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+</script>
+</body>
+</html>

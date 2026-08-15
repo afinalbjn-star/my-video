@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot AI Advanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --accent-color: #3b82f6;
+        }
+        
+        .dark {
+            --bg-primary: #1f2937;
+            --bg-secondary: #111827;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border-color: #374151;
+            --accent-color: #60a5fa;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+        }
+        
+        .chat-bubble {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .user-bubble {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .input-area {
+            background-color: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .message-content pre {
+            background-color: #1e1e1e;
+            border-radius: 6px;
+            padding: 12px;
+            overflow-x: auto;
+        }
+        
+        .message-content code {
+            font-family: 'Courier New', monospace;
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .dark .message-content code {
+            background-color: #374151;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #4b5563;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .voice-btn-active {
+            background-color: #ef4444 !important;
+            animation: pulse 1.5s infinite;
+            border-color: #ef4444 !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        #voice-btn:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .typing-indicator span {
+            animation: blink 1.4s infinite both;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .user-avatar {
+            background-color: #10b981;
+        }
+        
+        .ai-avatar {
+            background-color: #3b82f6;
+        }
+        
+        textarea {
+            resize: none;
+            overflow-y: hidden;
+        }
+    </style>
+</head>
+<body class="h-screen flex">
+    <!-- Sidebar -->
+    <div class="sidebar w-64 flex-shrink-0 hidden md:flex flex-col">
+        <div class="p-4 border-b border-[var(--border-color)]">
+            <button onclick="newChat()" class="w-full py-2 px-4 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 transition">
+                + New Chat
+            </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+            <h3 class="text-sm font-semibold text-[var(--text-secondary)] mb-2">Chat History</h3>
+            <div id="chat-history" class="space-y-2">
+                <!-- Chat history items will be added here -->
+            </div>
+        </div>
+        <div class="p-4 border-t border-[var(--border-color)]">
+            <div class="flex items-center space-x-2">
+                <div class="avatar user-avatar">U</div>
+                <div>
+                    <p class="text-sm font-medium">User</p>
+                    <p class="text-xs text-[var(--text-secondary)]">Online</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
+            <h1 class="text-xl font-bold">🤖 Chatbot AI Advanced</h1>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition">
+                    <span id="theme-icon">🌙</span>
+                </button>
+                <button onclick="document.getElementById('file-input').click()" class="p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition">
+                    📎
+                </button>
+                <input type="file" id="file-input" class="hidden" accept=".pdf,.txt,.docx" onchange="handleFileUpload(event)">
+                <button onclick="toggleCodingMode()" id="coding-mode-btn" class="p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition" title="Coding Mode">
+                    💻
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <div class="flex items-start space-x-3">
+                <div class="avatar ai-avatar">AI</div>
+                <div class="chat-bubble rounded-lg p-3 max-w-[70%]">
+                    <p class="message-content">Halo! Saya adalah asisten AI dengan Multi-Agent System. Saya sekarang bisa:</p>
+                    <ul class="message-content list-disc ml-4 mt-2">
+                        <li>🤖 <strong>Coder Agent:</strong> Coding mandiri dengan akses file system</li>
+                        <li>🔍 <strong>Searcher Agent:</strong> Web search mandiri untuk data terbaru</li>
+                        <li>📊 <strong>Analyzer Agent:</strong> Analisa directory dan project structure</li>
+                        <li>🔧 <strong>Improver Agent:</strong> Self-improvement untuk sistem</li>
+                        <li>🎯 <strong>Coordinator Agent:</strong> Automatic task routing</li>
+                        <li>💻 <strong>Coding Mode:</strong> Interface khusus untuk coding tasks</li>
+                    </ul>
+                    <p class="message-content mt-2">Contoh perintah:</p>
+                    <ul class="message-content list-disc ml-4 mt-2">
+                        <li>"Buat file Python baru untuk fungsi sorting"</li>
+                        <li>"Cari informasi tentang teknologi AI terbaru"</li>
+                        <li>"Analisa struktur project ini"</li>
+                        <li>"Perbaiki dan optimasi kode di file ini"</li>
+                        <li>Klik tombol 💻 untuk Coding Mode interface khusus</li>
+                    </ul>
+                    <p class="message-content mt-2">Ada yang bisa saya bantu?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" class="hidden px-4 py-2 text-[var(--text-secondary)]">
+            <span class="typing-indicator">AI sedang mengetik</span>
+            <span class="typing-indicator">.</span>
+            <span class="typing-indicator">.</span>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area p-4">
+            <div class="flex items-end space-x-2">
+                <textarea 
+                    id="message-input" 
+                    class="flex-1 p-3 border border-[var(--border-color)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                    placeholder="Ketik pesan Anda atau klik 🎤 untuk bicara..."
+                    rows="1"
+                    onkeydown="handleKeyDown(event)"
+                    oninput="autoResize(this)"
+                ></textarea>
+                <button 
+                    onclick="toggleVoiceInput()" 
+                    id="voice-btn"
+                    class="p-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-primary)] transition"
+                    title="Voice Input"
+                >
+                    🎤
+                </button>
+                <button 
+                    onclick="sendMessage()" 
+                    class="p-3 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 transition"
+                >
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-[var(--bg-primary)] p-6 rounded-lg max-w-md w-full mx-4">
+            <h3 class="text-lg font-bold mb-4">Upload Document</h3>
+            <div id="upload-status" class="mb-4"></div>
+            <button onclick="closeUploadModal()" class="w-full py-2 bg-[var(--accent-color)] text-white rounded-lg">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Voice Input Modal -->
+    <div id="voice-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-[var(--bg-primary)] p-6 rounded-lg max-w-md w-full mx-4 text-center">
+            <h3 class="text-lg font-bold mb-4">🎤 Voice Input</h3>
+            <div id="voice-status" class="mb-4">
+                <p class="text-[var(--text-secondary)]">Klik Start untuk mulai merekam suara</p>
+            </div>
+            <div id="voice-transcript" class="mb-4 p-3 bg-[var(--bg-secondary)] rounded-lg min-h-[100px] text-left hidden">
+                <p class="text-sm text-[var(--text-secondary)]">Transkrip:</p>
+                <p id="transcript-text" class="mt-2"></p>
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="startVoiceRecognition()" id="start-voice-btn" class="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    Start
+                </button>
+                <button onclick="stopVoiceRecognition()" id="stop-voice-btn" class="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition hidden">
+                    Stop
+                </button>
+                <button onclick="useVoiceTranscript()" id="use-voice-btn" class="flex-1 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 transition hidden">
+                    Gunakan
+                </button>
+                <button onclick="closeVoiceModal()" class="flex-1 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coding Mode Modal -->
+    <div id="coding-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-[var(--bg-primary)] p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">💻 Coding Mode</h3>
+                <button onclick="closeCodingModal()" class="text-2xl hover:opacity-70">×</button>
+            </div>
+            
+            <div class="space-y-4">
+                <!-- File Selection -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">File Target:</label>
+                    <div class="flex space-x-2">
+                        <input 
+                            type="text" 
+                            id="coding-file-path" 
+                            class="flex-1 p-2 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)]"
+                            placeholder="C:\Users\afina\my-video\file.py"
+                        >
+                        <button onclick="browseFiles()" class="px-4 py-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg hover:bg-[var(--bg-primary)] transition">
+                            Browse
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Coding Task -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Coding Task:</label>
+                    <textarea 
+                        id="coding-task" 
+                        class="w-full p-3 border border-[var(--border-color)] rounded-lg bg-[var(--bg-primary)] text-[var(--text-primary)] min-h-[100px]"
+                        placeholder="Describe what you want to code or modify..."
+                    ></textarea>
+                </div>
+
+                <!-- Quick Templates -->
+                <div>
+                    <label class="block text-sm font-medium mb-2">Quick Templates:</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="setCodingTemplate('new-python')" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 transition">
+                            New Python File
+                        </button>
+                        <button onclick="setCodingTemplate('new-html')" class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 transition">
+                            New HTML File
+                        </button>
+                        <button onclick="setCodingTemplate('fix-bug')" class="px-3 py-1 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition">
+                            Fix Bug
+                        </button>
+                        <button onclick="setCodingTemplate('add-feature')" class="px-3 py-1 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition">
+                            Add Feature
+                        </button>
+                        <button onclick="setCodingTemplate('optimize')" class="px-3 py-1 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700 transition">
+                            Optimize Code
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Code Preview -->
+                <div id="code-preview-container" class="hidden">
+                    <label class="block text-sm font-medium mb-2">Generated Code Preview:</label>
+                    <div class="p-3 bg-[var(--bg-secondary)] rounded-lg max-h-[300px] overflow-y-auto">
+                        <pre id="code-preview" class="text-sm"></pre>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex space-x-2">
+                    <button onclick="generateCode()" class="flex-1 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 transition">
+                        Generate Code
+                    </button>
+                    <button onclick="executeCode()" class="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                        Execute & Save
+                    </button>
+                </div>
+
+                <!-- Status -->
+                <div id="coding-status" class="p-3 bg-[var(--bg-secondary)] rounded-lg hidden">
+                    <p id="coding-status-text" class="text-sm"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize marked
+        marked.setOptions({
+            highlight: function(code, lang) {
+                const language = highlight.getLanguage(lang) ? lang : 'plaintext';
+                return highlight.highlight(code, { language }).value;
+            },
+            breaks: true
+        });
+
+        let conversationHistory = [];
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+            localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark');
+                document.getElementById('theme-icon').textContent = '☀️';
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+            // Shift+Enter untuk new line (default behavior)
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to UI
+            addMessage('user', message);
+            conversationHistory.push({ role: 'user', content: message });
+            
+            input.value = '';
+            autoResize(input);
+            
+            // Show typing indicator
+            document.getElementById('typing-indicator').classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message,
+                        history: conversationHistory.slice(0, -1)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // Hide typing indicator
+                document.getElementById('typing-indicator').classList.add('hidden');
+                
+                // Add AI response to UI
+                addMessage('assistant', data.reply);
+                conversationHistory.push({ role: 'assistant', content: data.reply });
+                
+                // Update chat history sidebar
+                updateChatHistory();
+                
+                // Auto-focus input for next message
+                setTimeout(() => document.getElementById('message-input').focus(), 100);
+                
+            } catch (error) {
+                document.getElementById('typing-indicator').classList.add('hidden');
+                addMessage('assistant', `Error: ${error.message}`);
+            }
+        }
+
+        function addMessage(role, content) {
+            const container = document.getElementById('messages-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-3';
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${role === 'user' ? 'user-avatar' : 'ai-avatar'}`;
+            avatar.textContent = role === 'user' ? 'U' : 'AI';
+            
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble rounded-lg p-3 max-w-[70%] ${role === 'user' ? 'user-bubble' : ''}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = marked.parse(content);
+            
+            // Add copy buttons to code blocks
+            contentDiv.querySelectorAll('pre code').forEach((block) => {
+                const pre = block.parentElement;
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'Copy';
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(block.textContent);
+                    copyBtn.textContent = 'Copied!';
+                    setTimeout(() => copyBtn.textContent = 'Copy', 2000);
+                };
+                pre.style.position = 'relative';
+                pre.appendChild(copyBtn);
+            });
+            
+            bubble.appendChild(contentDiv);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateChatHistory() {
+            const historyContainer = document.getElementById('chat-history');
+            historyContainer.innerHTML = '';
+            
+            conversationHistory.forEach((msg, index) => {
+                if (msg.role === 'user') {
+                    const item = document.createElement('div');
+                    item.className = 'p-2 rounded hover:bg-[var(--bg-primary)] cursor-pointer text-sm truncate';
+                    item.textContent = msg.content.substring(0, 30) + '...';
+                    item.onclick = () => loadConversation(index);
+                    historyContainer.appendChild(item);
+                }
+            });
+        }
+
+        function newChat() {
+            conversationHistory = [];
+            document.getElementById('messages-container').innerHTML = '';
+            addMessage('assistant', 'Halo! Mari mulai percakapan baru. Ada yang bisa saya bantu?');
+        }
+
+        async function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Show upload modal
+                document.getElementById('upload-modal').classList.remove('hidden');
+                document.getElementById('upload-status').innerHTML = `
+                    <p class="text-green-600">✓ File uploaded successfully!</p>
+                    <p class="text-sm text-[var(--text-secondary)]">Filename: ${data.filename}</p>
+                    <p class="text-sm text-[var(--text-secondary)] mt-2">Extracted text preview:</p>
+                    <p class="text-xs bg-[var(--bg-secondary)] p-2 rounded mt-1">${data.extracted_text}</p>
+                `;
+                
+                // Add message about uploaded file
+                addMessage('assistant', `Saya telah menerima dokumen "${data.filename}". Saya bisa membaca kontennya dan menjawab pertanyaan berdasarkan dokumen ini. Silakan bertanya apa saja tentang dokumen tersebut!`);
+                
+            } catch (error) {
+                document.getElementById('upload-modal').classList.remove('hidden');
+                document.getElementById('upload-status').innerHTML = `
+                    <p class="text-red-600">✗ Error uploading file: ${error.message}</p>
+                `;
+            }
+        }
+
+        function closeUploadModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }
+
+        // Voice Recognition Functions
+        let recognition = null;
+        let voiceTranscript = '';
+
+        function toggleVoiceInput() {
+            document.getElementById('voice-modal').classList.remove('hidden');
+            initVoiceRecognition();
+            
+            // Visual feedback
+            const voiceBtn = document.getElementById('voice-btn');
+            voiceBtn.classList.add('voice-btn-active');
+        }
+
+        function closeVoiceModal() {
+            document.getElementById('voice-modal').classList.add('hidden');
+            if (recognition) {
+                recognition.stop();
+            }
+            // Remove active state
+            const voiceBtn = document.getElementById('voice-btn');
+            voiceBtn.classList.remove('voice-btn-active');
+        }
+
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'id-ID'; // Bahasa Indonesia
+
+                recognition.onresult = function(event) {
+                    let interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            voiceTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    
+                    document.getElementById('transcript-text').textContent = 
+                        voiceTranscript + interimTranscript;
+                };
+
+                recognition.onerror = function(event) {
+                    document.getElementById('voice-status').innerHTML = 
+                        `<p class="text-red-600">Error: ${event.error}</p>`;
+                };
+
+                recognition.onend = function() {
+                    document.getElementById('start-voice-btn').classList.remove('hidden');
+                    document.getElementById('stop-voice-btn').classList.add('hidden');
+                    const voiceBtn = document.getElementById('voice-btn');
+                    voiceBtn.classList.remove('voice-btn-active');
+                    if (voiceTranscript) {
+                        document.getElementById('use-voice-btn').classList.remove('hidden');
+                        document.getElementById('voice-transcript').classList.remove('hidden');
+                    }
+                };
+            } else {
+                document.getElementById('voice-status').innerHTML = 
+                    '<p class="text-red-600">Browser tidak mendukung voice recognition. Gunakan Chrome atau Edge.</p>';
+            }
+        }
+
+        function startVoiceRecognition() {
+            if (recognition) {
+                voiceTranscript = '';
+                document.getElementById('transcript-text').textContent = '';
+                document.getElementById('voice-transcript').classList.add('hidden');
+                document.getElementById('use-voice-btn').classList.add('hidden');
+                document.getElementById('start-voice-btn').classList.add('hidden');
+                document.getElementById('stop-voice-btn').classList.remove('hidden');
+                document.getElementById('voice-status').innerHTML = 
+                    '<p class="text-green-600">🎤 Mendengarkan... (Berbicara sekarang)</p>';
+                // Add visual feedback to voice button
+                const voiceBtn = document.getElementById('voice-btn');
+                voiceBtn.classList.add('voice-btn-active');
+                recognition.start();
+            }
+        }
+
+        function stopVoiceRecognition() {
+            if (recognition) {
+                recognition.stop();
+                document.getElementById('voice-status').innerHTML = 
+                    '<p class="text-[var(--text-secondary)]">Recording dihentikan</p>';
+                // Remove visual feedback from voice button
+                const voiceBtn = document.getElementById('voice-btn');
+                voiceBtn.classList.remove('voice-btn-active');
+            }
+        }
+
+        function useVoiceTranscript() {
+            if (voiceTranscript) {
+                document.getElementById('message-input').value = voiceTranscript;
+                autoResize(document.getElementById('message-input'));
+                closeVoiceModal();
+                voiceTranscript = '';
+                // Focus input after using transcript
+                setTimeout(() => document.getElementById('message-input').focus(), 100);
+            }
+        }
+
+        // Coding Mode Functions
+        let codingMode = false;
+
+        function toggleCodingMode() {
+            codingMode = !codingMode;
+            const codingBtn = document.getElementById('coding-mode-btn');
+            
+            if (codingMode) {
+                codingBtn.classList.add('voice-btn-active');
+                document.getElementById('coding-modal').classList.remove('hidden');
+            } else {
+                codingBtn.classList.remove('voice-btn-active');
+                document.getElementById('coding-modal').classList.add('hidden');
+            }
+        }
+
+        function closeCodingModal() {
+            codingMode = false;
+            document.getElementById('coding-mode-btn').classList.remove('voice-btn-active');
+            document.getElementById('coding-modal').classList.add('hidden');
+        }
+
+        function browseFiles() {
+            // For now, just set a default path - in real implementation would use file dialog
+            document.getElementById('coding-file-path').value = 'C:\\Users\\afina\\my-video\\new_file.py';
+        }
+
+        function setCodingTemplate(template) {
+            const taskInput = document.getElementById('coding-task');
+            const filePath = document.getElementById('coding-file-path');
+            
+            switch(template) {
+                case 'new-python':
+                    taskInput.value = 'Create a new Python file with basic structure including main function, error handling, and docstring.';
+                    filePath.value = 'C:\\Users\\afina\\my-video\\new_file.py';
+                    break;
+                case 'new-html':
+                    taskInput.value = 'Create a new HTML file with modern structure, responsive design, and basic CSS styling.';
+                    filePath.value = 'C:\\Users\\afina\\my-video\\new_file.html';
+                    break;
+                case 'fix-bug':
+                    taskInput.value = 'Analyze the existing file and fix any bugs or errors found. Provide improved code with better error handling.';
+                    break;
+                case 'add-feature':
+                    taskInput.value = 'Add a new feature to the existing file. The feature should be well-documented and follow best practices.';
+                    break;
+                case 'optimize':
+                    taskInput.value = 'Optimize the existing code for better performance, readability, and maintainability.';
+                    break;
+            }
+        }
+
+        async function generateCode() {
+            const filePath = document.getElementById('coding-file-path').value;
+            const task = document.getElementById('coding-task').value;
+            
+            if (!filePath || !task) {
+                alert('Please fill in both file path and coding task');
+                return;
+            }
+
+            const statusDiv = document.getElementById('coding-status');
+            const statusText = document.getElementById('coding-status-text');
+            
+            statusDiv.classList.remove('hidden');
+            statusText.textContent = 'Generating code...';
+            statusText.className = 'text-sm text-blue-600';
+
+            try {
+                const response = await fetch('/agent/coder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: `Create/modify file at ${filePath}. Task: ${task}` 
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Show preview
+                const previewContainer = document.getElementById('code-preview-container');
+                const preview = document.getElementById('code-preview');
+                
+                previewContainer.classList.remove('hidden');
+                preview.textContent = data.reply;
+                
+                statusText.textContent = 'Code generated successfully! Review and click "Execute & Save" to apply.';
+                statusText.className = 'text-sm text-green-600';
+                
+            } catch (error) {
+                statusText.textContent = `Error: ${error.message}`;
+                statusText.className = 'text-sm text-red-600';
+            }
+        }
+
+        async function executeCode() {
+            const filePath = document.getElementById('coding-file-path').value;
+            const task = document.getElementById('coding-task').value;
+            
+            const statusDiv = document.getElementById('coding-status');
+            const statusText = document.getElementById('coding-status-text');
+            
+            statusText.textContent = 'Executing and saving code...';
+            statusText.className = 'text-sm text-blue-600';
+
+            try {
+                const response = await fetch('/agent/coder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: `Execute and save: Create/modify file at ${filePath}. Task: ${task}. Apply the changes now.` 
+                    })
+                });
+
+                const data = await response.json();
+                
+                statusText.textContent = `Code executed and saved successfully! ${data.reply}`;
+                statusText.className = 'text-sm text-green-600';
+                
+                // Add to chat
+                addMessage('assistant', `Code executed and saved to ${filePath}. ${data.reply}`);
+                
+                // Close modal after delay
+                setTimeout(() => {
+                    closeCodingModal();
+                }, 2000);
+                
+            } catch (error) {
+                statusText.textContent = `Error: ${error.message}`;
+                statusText.className = 'text-sm text-red-600';
+            }
+        }
+
+        // Initialize
+        loadTheme();
+        
+        // Auto-focus input on load
+        document.getElementById('message-input').focus();
+    </script>
+</body>
+</html>

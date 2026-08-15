@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2015",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -13,8 +13,18 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "react-jsx",
-    "noEmit": true
+    "noEmit": true,
+    "downlevelIteration": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "exclude": [
+    "node_modules",
+    "build",
+    "src/agent/multi-agent",
+    "src/agent/universal-agent.ts",
+    "test-fixes.ts",
+    "test-multi-agent-system.ts",
+    "diagnose-github.ts",
+    "server.ts"
+  ]
 }

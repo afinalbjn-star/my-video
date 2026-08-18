@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Absensi MM BJN Timur</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; }
+    header { background: #0f172a; color: #fff; padding: 16px 24px; }
+    header h1 { font-size: 20px; }
+    header p { font-size: 13px; color: #cbd5e1; margin-top: 2px; }
+    nav { background: #1e293b; display: flex; gap: 4px; padding: 0 16px; }
+    nav button { background: none; border: none; color: #cbd5e1; padding: 12px 16px; font-size: 14px; cursor: pointer; border-bottom: 3px solid transparent; }
+    nav button.active { color: #fff; border-bottom-color: #2563eb; font-weight: 600; }
+    main { padding: 20px 24px; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .bar { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    input, select, button { padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px; }
+    button { cursor: pointer; border: none; }
+    .btn-primary { background: #2563eb; color: #fff; font-weight: 600; }
+    .btn-green { background: #16a34a; color: #fff; font-weight: 600; }
+    .btn-orange { background: #d97706; color: #fff; font-weight: 600; }
+    .status { font-size: 13px; margin: 8px 0; min-height: 18px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+    th, td { padding: 8px 12px; text-align: left; font-size: 13px; border-bottom: 1px solid #e2e8f0; }
+    th { background: #e2e8f0; }
+    .sum { margin: 8px 0; font-weight: 600; }
+    .loading { color: #64748b; font-size: 13px; }
+    .card { background: #fff; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+    .badge-cocok { color: #16a34a; font-weight: 600; }
+    .badge-tidak { color: #d97706; font-weight: 700; }
+    .badge-telat { color: #dc2626; font-weight: 800; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid2 .field { grid-column: span 1; }
+    .warn { color: #d97706; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Absensi MM BJN Timur</h1>
+    <p>Aplikasi laporan absensi — data dari server cloud</p>
+  </header>
+  <nav id="tabs">
+    <button data-tab="laporan" class="active">Laporan</button>
+    <button data-tab="rekap">Rekap Harian</button>
+    <button data-tab="bulanan">Rekap Bulanan</button>
+    <button data-tab="manual">Entry Manual</button>
+    <button data-tab="admin">Admin</button>
+  </nav>
+  <main>
+
+    <section id="tab-laporan" class="tab active">
+      <div class="bar">
+        <div class="field">
+          <label>Alamat Server</label>
+          <input id="baseUrl" size="30" />
+        </div>
+        <div class="field">
+          <label>Kunci Akses</label>
+          <input id="kunci" size="14" />
+        </div>
+        <div class="field">
+          <label>Dari</label>
+          <input id="dari" type="date" />
+        </div>
+        <div class="field">
+          <label>Sampai</label>
+          <input id="sampai" type="date" />
+        </div>
+        <button class="btn-primary" id="btn-load">Muat Data</button>
+        <button class="btn-green" id="btn-export">Export Excel</button>
+        <button class="btn-orange" id="btn-pdf">Export PDF</button>
+      </div>
+      <div class="status" id="status"></div>
+      <div class="sum" id="sum"></div>
+      <div id="loading" class="loading"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th><th>Tanggal</th><th>Jam Masuk</th><th>Nama</th>
+            <th>Kelompok</th><th>Desa</th><th>Cocok Wajah</th><th>Telat</th><th>Foto</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </section>
+
+    <section id="tab-rekap" class="tab">
+      <div class="bar">
+        <div class="field">
+          <label>Tanggal</label>
+          <input id="r-tanggal" type="date" />
+        </div>
+        <button class="btn-primary" id="btn-rekap">Tampilkan Rekap</button>
+      </div>
+      <div class="status" id="status-rekap"></div>
+      <div class="sum" id="sum-rekap"></div>
+      <div id="loading-rekap" class="loading"></div>
+      <div id="rekap-box"></div>
+    </section>
+
+    <section id="tab-bulanan" class="tab">
+      <div class="bar">
+        <div class="field">
+          <label>Bulan</label>
+          <input id="b-bulan" type="month" />
+        </div>
+        <button class="btn-primary" id="btn-bulanan">Tampilkan Rekap Bulanan</button>
+      </div>
+      <div class="status" id="status-bulanan"></div>
+      <div class="sum" id="sum-bulanan"></div>
+      <div id="loading-bulanan" class="loading"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th><th>Nama</th><th>Kelompok</th><th>Desa</th>
+            <th>Hari Hadir</th><th>Jumlah Absen</th><th>Wajah Tak Cocok</th><th>Hari Telat</th>
+          </tr>
+        </thead>
+        <tbody id="rows-bulanan"></tbody>
+      </table>
+    </section>
+
+    <section id="tab-manual" class="tab">
+      <div class="card">
+        <h3 style="margin-bottom:16px;">Tambah Absen Manual (Petugas)</h3>
+        <div class="grid2">
+          <div class="field">
+            <label>Nama Siswa</label>
+            <input id="m-nama" />
+          </div>
+          <div class="field">
+            <label>Desa</label>
+            <select id="m-desa"></select>
+          </div>
+          <div class="field">
+            <label>Kelompok</label>
+            <select id="m-kelompok"></select>
+          </div>
+          <div class="field">
+            <label>Jenis Kelamin</label>
+            <select id="m-jk">
+              <option>Laki-laki</option>
+              <option>Perempuan</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Jam Masuk (opsional, kosong = otomatis)</label>
+            <input id="m-jam" placeholder="HH.MM.SS" />
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn-green" id="btn-manual">Simpan Absen Manual</button>
+        </div>
+        <div class="status" id="status-manual"></div>
+      </div>
+    </section>
+
+    <section id="tab-admin" class="tab">
+      <div class="card">
+        <h3 style="margin-bottom:4px;">Statistik Hari Ini</h3>
+        <div style="font-size:13px;color:#64748b;margin-bottom:12px;">Ringkasan kehadiran untuk tanggal yang dipilih di bawah.</div>
+        <div class="grid3" style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;background:#f8fafc;border-radius:10px;padding:14px;">
+            <div style="font-size:12px;color:#64748b;">Total Hadir</div>
+            <div id="a-total" style="font-size:26px;font-weight:800;margin-top:4px;">-</div>
+          </div>
+          <div style="flex:1;min-width:140px;background:#fef2f2;border-radius:10px;padding:14px;">
+            <div style="font-size:12px;color:#991b1b;">Telat</div>
+            <div id="a-telat" style="font-size:26px;font-weight:800;margin-top:4px;color:#dc2626;">-</div>
+          </div>
+          <div style="flex:1;min-width:140px;background:#fffbeb;border-radius:10px;padding:14px;">
+            <div style="font-size:12px;color:#92400e;">Wajah Tak Cocok</div>
+            <div id="a-wajah" style="font-size:26px;font-weight:800;margin-top:4px;color:#d97706;">-</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:12px;align-items:end;">
+          <div class="field">
+            <label>Tanggal</label>
+            <input id="a-tanggal" type="date" />
+          </div>
+          <button class="btn-primary" id="btn-admin-muat">Muat Statistik</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:4px;">Jam Mulai Pertemuan (per desa)</h3>
+        <div style="font-size:13px;color:#64748b;margin-bottom:12px;">
+          Atur jam mulai untuk tanggal yang dipilih. Siswa yang masuk melebihi jam mulai + toleransi ditandai TELAT.
+          Kosongkan jam lalu Simpan untuk menghapus.
+        </div>
+        <div class="field" style="margin-bottom:12px;max-width:220px;">
+          <label>Tanggal</label>
+          <input id="a-jadwal-tanggal" type="date" />
+        </div>
+        <div id="a-jadwal-ui"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:4px;">Toleransi Telat</h3>
+        <div style="font-size:13px;color:#64748b;margin-bottom:12px;">
+          Batas kelonggaran setelah jam mulai (dalam menit). Berlaku untuk semua desa.
+        </div>
+        <div style="display:flex;gap:12px;align-items:end;">
+          <div class="field" style="max-width:120px;">
+            <label>Menit</label>
+            <input id="a-toleransi" type="number" min="0" max="120" />
+          </div>
+          <button class="btn-green" id="btn-toleransi">Simpan Toleransi</button>
+        </div>
+        <div class="status" id="status-admin"></div>
+      </div>
+    </section>
+
+  </main>
+  <script src="renderer.js"></script>
+</body>
+</html>

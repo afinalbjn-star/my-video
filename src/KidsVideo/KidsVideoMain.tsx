@@ -4,6 +4,7 @@ import { IntroScene } from './IntroScene';
 import { ColorsScene } from './ColorsScene';
 import { NumbersScene } from './NumbersScene';
 import { ShapesScene } from './ShapesScene';
+import { VolleyballScene } from './VolleyballScene';
 import { OutroScene } from './OutroScene';
 
 // Total 70 seconds at 30fps = 2100 frames

@@ -1,0 +1,21 @@
+{
+  "softwares": [
+    {
+      "id": "sw1",
+      "name": "Test App",
+      "version": "1.0",
+      "category": "Pengembangan",
+      "vendor": "Nando"
+    }
+  ],
+  "licenses": [
+    {
+      "id": "lic1",
+      "softwareId": "sw1",
+      "type": "Perpetual",
+      "quantity": 2,
+      "price": 1500000,
+      "expiry": ""
+    }
+  ]
+}

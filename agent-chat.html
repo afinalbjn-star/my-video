@@ -1,0 +1,1850 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NANDO AGENT AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <link rel="stylesheet" href="/vendor/xterm.css">
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --bg-side: #12161f;
+      --bg-side-2: #181d29;
+      --bg-input: #0e1119;
+      --border: #232a38;
+      --border-hover: #374151;
+      --text: #e8edf5;
+      --text-dim: #9aa5b8;
+      --text-muted: #667089;
+      --accent: #5b8cff;
+      --accent-2: #7c5cff;
+      --accent-soft: rgba(91,140,255,0.12);
+      --green: #34d399;
+      --amber: #f5b83d;
+      --red: #f87171;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.35);
+      --font: 'Inter', system-ui, sans-serif;
+      --mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg); color: var(--text);
+      height: 100vh; display: flex; overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a3344; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a4558; }
+    button { font-family: var(--font); }
+    input, textarea, select { font-family: var(--font); }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 288px; min-width: 288px;
+      background: var(--bg-side); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+    }
+    .brand {
+      padding: 16px 16px 14px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 11px;
+    }
+    .brand-logo {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, #5b8cff, #7c5cff);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 17px; color: #fff;
+      box-shadow: 0 4px 14px rgba(91,140,255,0.35);
+      letter-spacing: -0.5px;
+    }
+    .brand-name { font-weight: 700; font-size: 14px; letter-spacing: 0.01em; }
+    .brand-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .new-chat {
+      margin: 14px; padding: 9px 14px;
+      background: var(--bg-side-2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text);
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all 0.15s;
+    }
+    .new-chat:hover { border-color: var(--accent); color: var(--accent); background: var(--bg-side); }
+    .new-chat .nc-icon { font-size: 14px; color: var(--accent); }
+    .side-label {
+      font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--text-muted); padding: 12px 18px 6px; font-weight: 600;
+    }
+    .side-info { padding: 0 18px 14px; font-size: 12px; color: var(--text-muted); line-height: 1.65; }
+    .side-info code { background: var(--bg-side-2); padding: 1px 5px; border-radius: 4px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+
+    .history-list { flex: 1; overflow-y: auto; padding: 0 10px; }
+    .history-empty { padding: 8px 16px; font-size: 12px; color: var(--text-muted); }
+    .history-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; margin: 2px 0; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 12.5px; color: var(--text);
+      transition: background 0.15s; border: 1px solid transparent;
+    }
+    .history-item:hover { background: var(--bg-side-2); }
+    .history-item.active { background: var(--accent-soft); border-color: rgba(91,140,255,0.25); color: var(--accent); }
+    .history-item .h-title {
+      flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .history-item .h-del {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 13px; padding: 2px 5px; border-radius: 5px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .history-item:hover .h-del { opacity: 1; }
+    .history-item .h-del:hover { background: rgba(248,113,113,0.15); color: var(--red); }
+    .sidebar-bottom {
+      margin-top: auto; padding: 14px 18px; border-top: 1px solid var(--border);
+    }
+    .status-row {
+      display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim);
+      padding: 8px 10px; background: var(--bg-side-2); border-radius: var(--radius-sm);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.6); }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .chat-header {
+      padding: 12px 22px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(18,22,31,0.85); backdrop-filter: blur(8px);
+      gap: 12px;
+    }
+    .chat-title { font-size: 14px; font-weight: 650; display: flex; align-items: center; gap: 8px; }
+    .chat-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font); padding: 0; border: none; background: none; }
+
+    .chat-body { flex: 1; overflow-y: auto; padding: 26px; }
+    .chat-body-inner { max-width: 860px; margin: 0 auto; }
+
+    .empty { text-align: center; padding: 90px 20px; }
+    .empty .empty-orb {
+      width: 56px; height: 56px; margin: 0 auto 20px; border-radius: 14px;
+      background: var(--bg-side-2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: var(--accent);
+    }
+    .empty h1 { font-size: 24px; font-weight: 750; margin-bottom: 10px; letter-spacing: -0.02em; }
+    .empty p { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; max-width: 460px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+    .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 620px; margin: 0 auto; }
+    .quick {
+      background: var(--bg-side); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px; cursor: pointer; text-align: left;
+      font-family: inherit; color: var(--text); font-size: 13px;
+      transition: all 0.15s; position: relative; overflow: hidden;
+    }
+    .quick:hover { border-color: var(--accent); transform: translateY(-1px); background: var(--bg-side-2); }
+    .quick small { color: var(--text-muted); display: block; margin-top: 5px; font-size: 12px; }
+
+    .msg { display: flex; gap: 12px; margin-bottom: 26px; animation: fade 0.2s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; } }
+    .avatar {
+      width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      border: 1px solid var(--border); background: var(--bg-side-2);
+    }
+    .avatar.user { border-color: rgba(124,92,255,0.35); }
+    .avatar.ai { border-color: rgba(91,140,255,0.35); }
+    .msg-content { flex: 1; min-width: 0; }
+    .msg-name { font-size: 12px; font-weight: 650; color: var(--text-dim); margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+    .msg-name .m-time { font-weight: 400; font-size: 11px; color: var(--text-muted); }
+
+    .bubble {
+      font-size: 14px; line-height: 1.75; overflow-wrap: break-word;
+      background: var(--bg-side); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 18px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .msg.msg-user .bubble {
+      background: transparent; border-color: transparent;
+    }
+    .bubble p { margin-bottom: 8px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble h1,.bubble h2,.bubble h3 { margin: 14px 0 8px; letter-spacing: -0.01em; }
+    .bubble ul,.bubble ol { padding-left: 20px; margin-bottom: 8px; }
+    .bubble li { margin: 4px 0; }
+    .bubble a { color: var(--accent); text-decoration: none; }
+    .bubble a:hover { text-decoration: underline; }
+    .bubble :not(pre) > code {
+      background: var(--bg-side-2); padding: 2px 6px; border-radius: 4px;
+      font-family: var(--mono); font-size: 12.5px; color: #9dc6ff;
+    }
+    .bubble pre {
+      background: #0a0d14; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 0; margin: 10px 0; overflow: hidden;
+    }
+    .bubble pre .code-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 12px; background: #131724; border-bottom: 1px solid var(--border);
+      font-size: 11px; color: var(--text-muted); font-family: var(--mono);
+    }
+    .bubble pre .code-head button {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-family: inherit; font-size: 11px; padding: 2px 6px; border-radius: 4px;
+    }
+    .bubble pre .code-head button:hover { color: var(--text); background: #1c2231; }
+    .bubble pre code { display: block; padding: 13px 16px; overflow-x: auto; font-size: 12.5px; line-height: 1.6; }
+    .bubble table { border-collapse: collapse; margin: 10px 0; width: 100%; }
+    .bubble th,.bubble td { border: 1px solid var(--border); padding: 7px 12px; font-size: 13px; }
+    .bubble th { background: var(--bg-side-2); text-align: left; }
+    .bubble blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text-dim); margin: 8px 0; }
+
+    /* ── Agentic panels ── */
+    .agent-panel {
+      margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--bg-side); overflow: hidden;
+    }
+    .agent-panel .ap-head {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 12px; font-size: 12px; font-weight: 650;
+      color: var(--text); cursor: pointer; user-select: none;
+      transition: background 0.12s;
+    }
+    .agent-panel .ap-head:hover { background: var(--bg-side-2); }
+    .agent-panel .ap-body { padding: 0 12px 12px; font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+    .agent-panel .ap-body pre, .agent-panel .ap-body code { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12px; color: #9dc6ff; }
+    .agent-panel.plan .ap-head { color: var(--accent); }
+    .agent-panel.reasoning .ap-head { color: var(--amber); }
+    .agent-panel.verify .ap-head { color: var(--green); }
+    .agent-panel .ap-status { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+    .agent-panel.collapsed .ap-body { display: none; }
+    .ap-spin { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Media preview di pesan user ── */
+    .media-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .media-box {
+      max-width: 220px; padding: 6px; border-radius: var(--radius-sm);
+      background: var(--bg-input); border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .media-box img { display: block; max-width: 100%; max-height: 160px; border-radius: 5px; }
+    .media-box span { font-size: 12px; color: var(--text-muted); word-break: break-all; }
+
+    /* ── Tool call pill ── */
+    .tool-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-side-2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 10px; margin: 6px 0;
+      font-family: var(--mono); font-size: 12px; color: var(--text-dim);
+    }
+    .tool-pill .spinner { width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .tool-pill .tool-name { color: var(--accent); font-weight: 600; }
+    .tool-result {
+      background: #0a0d14; border: 1px solid var(--border); border-left: 3px solid var(--green);
+      border-radius: 6px; padding: 9px 12px; margin: 4px 0 10px;
+      font-family: var(--mono); font-size: 11.5px; color: var(--text-muted);
+      white-space: pre-wrap; max-height: 180px; overflow-y: auto;
+    }
+    .tool-preview { margin: 6px 0 8px; }
+    .tool-preview img {
+      display: block; max-width: 360px; max-height: 240px; border-radius: 8px;
+      border: 1px solid var(--border); cursor: zoom-in;
+    }
+    .tool-preview-cap { font-size: 11px; color: var(--text-muted); margin-top: 5px; word-break: break-all; }
+
+    .cursor-blink { display: inline-block; width: 8px; height: 15px; background: var(--accent); vertical-align: middle; animation: blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Thinking dots (titik berdenyut) ── */
+    .thinking {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: var(--mono); font-size: 12px; color: var(--text-dim);
+    }
+    .thinking .tdots { display: inline-flex; gap: 4px; margin-right: 8px; }
+    .thinking .tdot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); animation: tdot 1.2s infinite ease-in-out;
+    }
+    .thinking .tdot:nth-child(2) { animation-delay: 0.15s; }
+    .thinking .tdot:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes tdot {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
+      30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── Header: status agent ── */
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Tab (Chat / Terminal) ── */
+    .tabs { display: flex; gap: 2px; background: var(--bg-side-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px; }
+    .tab {
+      background: none; border: none; color: var(--text-muted);
+      font-family: inherit; font-size: 12.5px; font-weight: 500;
+      padding: 5px 13px; border-radius: 6px; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--bg-side); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+    /* ── Terminal view ── */
+    .terminal-view {
+      flex: 1; display: flex; flex-direction: column; min-height: 0;
+      padding: 16px 24px 0; max-width: 900px; width: 100%; margin: 0 auto;
+    }
+    .term-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; gap: 10px;
+    }
+    .term-title { font-family: var(--mono); font-size: 12.5px; color: var(--text-dim); }
+    .term-mode-bar { display: flex; align-items: center; gap: 6px; }
+    .term-mode {
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      font-family: var(--mono); font-size: 11.5px; padding: 4px 11px; border-radius: 16px;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .term-mode:hover { color: var(--text); border-color: var(--text-dim); }
+    .term-mode.active { background: var(--accent-soft); color: var(--accent); border-color: rgba(91,140,255,0.3); }
+    .live-head {
+      display: flex; align-items: center; gap: 8px; margin: 0 0 8px;
+      font-family: var(--mono); font-size: 12px; color: var(--text-dim);
+    }
+    .live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); transition: all 0.2s; }
+    .live-dot.on { background: var(--green); box-shadow: 0 0 8px rgba(52,211,153,0.7); animation: pulse 1.6s infinite; }
+    .live-dot.busy { background: var(--amber); box-shadow: 0 0 8px rgba(251,191,36,0.7); animation: pulse 1.1s infinite; }
+    .live-spacer { flex: 1; }
+    .live-term {
+      flex: 1; min-height: 0; overflow: hidden; border-radius: 10px;
+      border: 1px solid var(--border); background: #0a0d14; padding: 8px;
+    }
+    .live-hint { color: var(--text-muted); font-size: 12px; margin: 8px 0 12px; line-height: 1.6; }
+    .live-term .xterm { height: 100%; }
+    .live-term .xterm-viewport { background: transparent !important; }
+    .term-clear {
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      font-family: var(--mono); font-size: 11.5px; padding: 4px 10px; border-radius: 6px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .term-clear:hover { color: var(--red); border-color: var(--red); }
+    .term-output {
+      flex: 1; overflow-y: auto; background: #0a0d14;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 14px 16px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7;
+      white-space: pre-wrap; word-break: break-word; color: #c9d4e4; min-height: 0;
+    }
+    .term-output .term-line { color: #d1fae5; }
+    .term-output .term-err-line { color: var(--red); }
+    .term-output .term-info-line { color: var(--text-muted); }
+    .term-output .term-placeholder { color: var(--text-muted); font-style: italic; }
+    .term-output .term-code { background: var(--bg-side-2); padding: 1px 5px; border-radius: 4px; color: var(--accent); font-style: normal; }
+    .term-input-row {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 12px; margin: 10px 0 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .term-input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,140,255,0.12); }
+    .term-prompt { color: var(--green); font-family: var(--mono); font-weight: 600; font-size: 14px; }
+    .term-input {
+      flex: 1; background: none; border: none; outline: none; color: var(--text);
+      font-family: var(--mono); font-size: 13px; caret-color: var(--accent);
+    }
+    .term-input::placeholder { color: var(--text-muted); }
+    .term-run {
+      background: linear-gradient(135deg, var(--green), #10b981); color: #04261a;
+      border: none; font-family: var(--mono); font-weight: 700; font-size: 12px;
+      padding: 7px 14px; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+    }
+    .term-run:hover { filter: brightness(1.1); }
+    .term-run:disabled { opacity: 0.4; cursor: not-allowed; }
+    .term-stop {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.4);
+      color: var(--red); font-family: var(--mono); font-size: 12px; font-weight: 600;
+      padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    }
+    .term-stop:hover { background: rgba(248,113,113,0.2); }
+    .term-stop.hidden { display: none; }
+    .agent-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: inherit; font-size: 12px; color: var(--text-dim);
+      padding: 0; white-space: nowrap; transition: all 0.2s;
+    }
+    .agent-status .as-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      flex-shrink: 0;
+    }
+    .agent-status.busy { border-color: var(--accent); color: var(--accent); }
+    .agent-status.busy .as-dot { background: var(--accent); animation: pulse 1.2s infinite; }
+    .agent-status.tool { border-color: var(--amber); color: var(--amber); }
+    .agent-status.tool .as-dot { background: var(--amber); animation: pulse 0.9s infinite; }
+    .agent-status.thinking { border-color: var(--accent-2); color: #a78bfa; }
+    .agent-status.thinking .as-dot { background: var(--accent-2); animation: pulse 1s infinite; }
+
+    /* ── Tombol Stop ── */
+    .stop-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.4);
+      color: var(--red); font-family: var(--mono); font-size: 12px; font-weight: 600;
+      padding: 6px 13px; border-radius: 20px; cursor: pointer;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .stop-btn:hover { background: rgba(248,113,113,0.2); border-color: var(--red); }
+    .stop-btn .stop-square {
+      width: 9px; height: 9px; background: currentColor; border-radius: 2px;
+    }
+    .stop-btn.hidden { display: none; }
+
+    /* ── Tool pill: eksekusi shell (nuansa terminal) ── */
+    .tool-pill.terminal {
+      border-left: 1px solid var(--border);
+      background: var(--bg-side-2);
+    }
+    .tool-pill.terminal .tool-name { color: var(--green); }
+    .tool-pill.terminal .cmd { color: #d1fae5; }
+    .tool-pill.terminal .cmd-prompt { color: var(--green); font-weight: 600; }
+    .tool-pill .spinner { flex-shrink: 0; }
+    .tool-pill .pulse-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+      animation: pulse 1s infinite; flex-shrink: 0;
+    }
+    .tool-pill.terminal .pulse-dot { background: var(--green); }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+      50% { box-shadow: 0 0 0 7px rgba(52,211,153,0); }
+    }
+
+    /* ── Input ── */
+    .input-area { padding: 14px 24px 20px; border-top: 1px solid var(--border); background: var(--bg-side); }
+    .input-wrap {
+      max-width: 860px; margin: 0 auto;
+      display: flex; align-items: flex-end; gap: 8px;
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,140,255,0.12); }
+    textarea {
+      flex: 1; background: none; border: none; outline: none; resize: none;
+      color: var(--text); font-family: var(--mono); font-size: 13.5px;
+      line-height: 1.6; max-height: 160px; padding: 6px 4px;
+      caret-color: var(--accent);
+    }
+    textarea::placeholder { color: var(--text-muted); }
+    .send {
+      width: 38px; height: 38px; border-radius: var(--radius-sm); border: none; cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white; font-size: 15px; flex-shrink: 0;
+      transition: transform 0.12s, filter 0.12s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .send:hover { filter: brightness(1.1); }
+    .send:active { transform: scale(0.94); }
+    .send:disabled { opacity: 0.4; cursor: not-allowed; filter: none; transform: none; }
+    .hint { max-width: 860px; margin: 9px auto 0; font-size: 11px; color: var(--text-muted); }
+
+    /* ── Attach (upload media) button ── */
+    .attach {
+      width: 38px; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+      background: var(--bg-side-2); color: var(--text-dim); cursor: pointer; flex-shrink: 0;
+      font-size: 18px; line-height: 1; font-weight: 500; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .attach:hover { border-color: var(--accent); color: var(--accent); }
+    .hidden { display: none; }
+
+    /* ── Attachment preview chips ── */
+    .attach-preview {
+      max-width: 860px; margin: 0 auto 8px; display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .attach-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 6px 9px; font-size: 12px;
+    }
+    .attach-chip .a-thumb { width: 34px; height: 34px; object-fit: cover; border-radius: 6px; }
+    .attach-chip .a-name { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+    .attach-chip .a-size { color: var(--text-muted); font-size: 11px; }
+    .attach-chip .a-x {
+      background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; padding: 2px 4px;
+    }
+    .attach-chip .a-x:hover { color: var(--red); }
+
+    /* ── Mode selector ── */
+    .mode-bar { max-width: 860px; margin: 0 auto 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .mode-chip {
+      padding: 6px 12px; border-radius: 8px; cursor: pointer;
+      border: 1px solid transparent; background: transparent;
+      color: var(--text-muted); font-size: 12.5px; font-family: inherit; font-weight: 500;
+      transition: all 0.15s;
+    }
+    .mode-chip:hover { background: var(--bg-side-2); color: var(--text); }
+    .mode-chip.active {
+      background: var(--bg-side-2); color: var(--text);
+      border-color: var(--border);
+    }
+    #modelSelect.mode-chip {
+      background: var(--bg-side-2); border-color: var(--border); color: var(--text-dim);
+    }
+    #modelSelect.mode-chip:focus { outline: none; border-color: var(--accent); }
+
+    /* ── Mic button ── */
+    .mic {
+      width: 38px; height: 38px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+      background: var(--bg-side-2); color: var(--text-dim); cursor: pointer; flex-shrink: 0;
+      font-size: 15px; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mic:hover { border-color: var(--accent); color: var(--accent); }
+    .mic.recording {
+      background: linear-gradient(135deg, #f87171, #ef4444); color: white; border-color: #f87171;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(248,113,113,0.4);} 50%{ box-shadow: 0 0 0 8px rgba(248,113,113,0);} }
+
+    /* ── Light theme ── */
+    body.light {
+      --bg: #f4f6fb;
+      --bg-side: #ffffff;
+      --bg-side-2: #eef1f7;
+      --bg-input: #ffffff;
+      --border: #dbe1ee;
+      --border-hover: #c4cde2;
+      --text: #1a2233;
+      --text-dim: #55607a;
+      --text-muted: #7d879e;
+      --accent-soft: rgba(91,140,255,0.12);
+    }
+    body.light .bubble pre,
+    body.light .tool-result,
+    body.light .term-output,
+    body.light .live-term,
+    body.light .tool-pill.terminal,
+    body.light .bubble { background: #fbfcfe; }
+    body.light .history-item:hover { background: var(--bg-side-2); }
+    body.light .send { color: #fff; }
+
+    /* ── Theme toggle ── */
+    .theme-toggle {
+      width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--bg-side-2); color: var(--text-dim); cursor: pointer;
+      font-size: 16px; flex-shrink: 0; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Hamburger (mobile) ── */
+    .burger {
+      display: none; width: 34px; height: 34px; border-radius: 10px;
+      border: 1px solid var(--border); background: var(--bg-side-2);
+      color: var(--text-dim); cursor: pointer; font-size: 16px; flex-shrink: 0;
+      align-items: center; justify-content: center;
+    }
+    .burger:hover { border-color: var(--accent); color: var(--accent); }
+    .sidebar.open { transform: translateX(0); }
+
+    /* ── Shine animation ── */
+    .brand-logo, .send {
+      background-image: linear-gradient(135deg, #5b8cff, #7c5cff, #a855f7, #5b8cff);
+      background-size: 250% 250%;
+      animation: shine 6s ease infinite;
+    }
+    @keyframes shine { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    /* ── Copy seluruh pesan AI ── */
+    .msg-actions {
+      display: flex; align-items: center; gap: 4px; margin-top: 6px; opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .msg:hover .msg-actions { opacity: 1; }
+    .msg-action {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 13px; padding: 3px 7px; border-radius: 6px; transition: all 0.15s;
+    }
+    .msg-action:hover { color: var(--accent); background: var(--accent-soft); }
+    .msg-action.feedback-on { color: var(--accent); }
+    .msg-action.regen { color: var(--text-dim); }
+    .msg-action.regen:hover { color: var(--accent-2); background: rgba(124,92,255,0.12); }
+
+    /* ── Suggestion chips (tindak lanjut) ── */
+    .suggestions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .sugg-chip {
+      background: var(--bg-side-2); border: 1px solid var(--border);
+      color: var(--text-dim); border-radius: 16px; padding: 5px 11px;
+      font-size: 12px; cursor: pointer; transition: all 0.15s;
+    }
+    .sugg-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+    /* ── Scroll to bottom float ── */
+    .scroll-bottom {
+      position: fixed; right: 22px; bottom: 96px; z-index: 40;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--accent-soft); border: 1px solid var(--accent);
+      color: var(--accent); cursor: pointer; font-size: 16px;
+      display: none; align-items: center; justify-content: center;
+      box-shadow: var(--shadow); transition: all 0.15s;
+    }
+    .scroll-bottom.show { display: flex; }
+    .scroll-bottom:hover { background: rgba(91,140,255,0.22); }
+
+    /* ── History search ── */
+    .history-search {
+      margin: 0 10px 8px; padding: 7px 11px;
+      background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); font-size: 12.5px;
+      outline: none; transition: border-color 0.2s;
+    }
+    .history-search:focus { border-color: var(--accent); }
+    .history-search::placeholder { color: var(--text-muted); }
+
+    /* ── Streaming fade-in ── */
+    .bubble.stream-fade { animation: fadeStream 0.4s ease; }
+    @keyframes fadeStream { from { opacity: 0.55; } to { opacity: 1; } }
+
+    /* ── Network dot (header) ── */
+    
+
+    /* ── Responsive ── */
+    @media (max-width: 820px) {
+      .burger { display: flex; }
+      .sidebar {
+        display: flex; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
+        transform: translateX(-100%); transition: transform 0.25s ease;
+        box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      }
+      .sidebar-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45;
+        opacity: 0; pointer-events: none; transition: opacity 0.25s;
+      }
+      .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
+      .chat-body { padding: 18px 14px; }
+      .input-area { padding: 12px 14px 16px; }
+      .bubble { padding: 12px 14px; }
+      .quick-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">N</div>
+    <div>
+      <div class="brand-name">NANDO AGENT AI</div>
+      <div class="brand-sub">Coding · Video · Agentik</div>
+    </div>
+  </div>
+  <button class="new-chat" onclick="newChat()"><span class="nc-icon">✚</span> Obrolan Baru</button>
+  <div class="side-label" style="display:flex;justify-content:space-between;align-items:center;">
+    <span>Riwayat</span>
+    <span id="clearAllBtn" onclick="clearAllHistory()" style="cursor:pointer;font-size:10px;letter-spacing:0;text-transform:none;color:var(--text-muted);">Hapus semua</span>
+  </div>
+  <input type="text" id="historySearch" class="history-search" placeholder="Cari riwayat..." oninput="onHistorySearch(this.value)" autocomplete="off" />
+  <div class="history-list" id="historyList">
+    <div class="history-empty" id="historyEmpty">Belum ada riwayat.</div>
+  </div>
+  <div class="side-info">
+    Asisten untuk proyek Remotion Anda.
+  </div>
+  <div class="sidebar-bottom">
+    <div class="status-row"><div class="dot"></div> Gemini <span id="statusModel">terhubung</span></div>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Main -->
+<main class="main">
+  <div class="chat-header">
+    <button class="burger" id="burgerBtn" onclick="toggleSidebar()" title="Menu">☰</button>
+    <span class="chat-title">NANDO AGENT AI</span>
+    <div class="header-right">
+      <nav class="tabs" id="mainTabs">
+        <button class="tab active" data-tab="chat" onclick="switchTab('chat')">Chat</button>
+        <button class="tab" data-tab="terminal" onclick="switchTab('terminal')">Terminal</button>
+      </nav>
+      <span class="agent-status" id="agentStatus"><span class="as-dot"></span><span id="agentStatusText">siap</span></span>
+      <span class="chat-meta" id="chatMeta">localhost:5000</span>
+      <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Ganti tema">🌙</button>
+      <button class="stop-btn hidden" id="stopBtn" onclick="stopStream()" title="Hentikan proses yang sedang berjalan"><span class="stop-square"></span> Stop</button>
+    </div>
+  </div>
+
+  <div class="chat-body" id="chatBody">
+    <div class="chat-body-inner" id="chatInner">
+      <div class="empty" id="emptyState">
+        <div class="empty-orb">✦</div>
+        <h1>Halo, saya siap membantu</h1>
+        <p>Asisten AI untuk proyek Remotion Anda. Buat komponen video, edit file, jalankan perintah, atau riset di internet.</p>
+        <div class="quick-grid">
+          <button class="quick" onclick="quick('buat video remotion tentang teknologi AI')"><b>Buat video Remotion</b><small>Tentang teknologi AI</small></button>
+          <button class="quick" onclick="quick('jalankan npm run lint dan tunjukkan hasilnya')"><b>Jalankan perintah</b><small>npm run lint</small></button>
+          <button class="quick" onclick="quick('perbaiki error remotion studio berikut: [tempel error]')"><b>Perbaiki bug</b><small>Lampirkan pesan error</small></button>
+          <button class="quick" onclick="quick('buat logo SVG sederhana untuk video saya dan tampilkan')"><b>Buat SVG</b><small>Logo, ikon, background vektor</small></button>
+          <button class="quick" onclick="quick('generate gambar ilustrasi untuk video: [deskripsi]')"><b>Generate gambar AI</b><small>Foto/ilustrasi (butuh billing)</small></button>
+          <button class="quick" onclick="quick('buka https://labs.google/fx/tools/flow di browser')"><b>Buka di browser</b><small>ImageFX, dokumentasi, dll</small></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="terminal-view hidden" id="terminalView">
+    <div class="term-head">
+      <div class="term-mode-bar">
+        <button class="term-mode active" data-mode="run" onclick="setTermMode('run')">⚡ Run sekali</button>
+        <button class="term-mode" data-mode="live" onclick="setTermMode('live')">🔗 Interaktif opencode</button>
+      </div>
+      <button class="term-clear" id="termClearBtn" onclick="clearTerminal()">🗑 Bersihkan</button>
+    </div>
+    <div id="termRunPanel">
+      <div class="term-output" id="termOutput">
+        <div class="term-placeholder">Ketik perintah di bawah lalu tekan Enter. Output dari <span class="term-code">opencode run &lt;perintah&gt;</span> akan tampil di sini secara live.</div>
+      </div>
+      <div class="term-input-row">
+        <span class="term-prompt">❯</span>
+        <input type="text" id="termInput" class="term-input" placeholder="contoh: buat komponen src/MyVideo.tsx dan daftarkan di Root.tsx" onkeydown="termKey(event)" autocomplete="off" spellcheck="false" />
+        <button class="term-run" id="termRunBtn" onclick="runTerminal()">▶ Run</button>
+        <button class="term-stop hidden" id="termStopBtn" onclick="stopTerminal()"><span class="stop-square"></span> Stop</button>
+      </div>
+    </div>
+    <div id="termLivePanel" class="hidden">
+      <div class="live-head">
+        <span class="live-dot" id="liveDot"></span>
+        <span id="liveStatus">Belum terhubung</span>
+        <span class="live-spacer"></span>
+        <button class="term-run" id="liveConnectBtn" onclick="toggleLive()">🔌 Hubungkan</button>
+      </div>
+      <div class="live-term" id="liveTerm"></div>
+      <div class="live-hint">Terminal interaktif opencode (TUI). Klik pada area terminal, lalu ketik seperti di command line biasa. Gunakan <b>Ctrl+C</b> untuk interrupt, <b>Ctrl+D</b> untuk keluar.</div>
+    </div>
+  </div>
+
+  <div class="input-area" id="inputArea">
+    <div class="mode-bar" id="modeBar">
+      <button class="mode-chip active" data-mode="auto" onclick="setMode('auto')">Otomatis</button>
+      <button class="mode-chip" data-mode="general" onclick="setMode('general')">Obrolan Umum</button>
+      <button class="mode-chip" data-mode="internet" onclick="setMode('internet')">Cari Internet</button>
+      <button class="mode-chip" data-mode="code" onclick="setMode('code')">Coding / File</button>
+      <button class="mode-chip" data-mode="opencode" onclick="setMode('opencode')">⚡ Opencode</button>
+      <select id="modelSelect" class="mode-chip" onchange="onModelChange(this.value)" title="Pilih model AI"></select>
+    </div>
+    <div class="attach-preview" id="attachPreview"></div>
+    <div class="input-wrap">
+      <input type="file" id="fileInput" class="hidden" multiple onchange="handleFiles(this)" />
+      <button class="attach" id="attachBtn" onclick="document.getElementById('fileInput').click()" title="Tambah media (gambar, video, audio, font)">＋</button>
+      <textarea id="userInput" rows="1" placeholder="Ketik atau tekan mic untuk bicara..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="mic" id="micBtn" onclick="toggleRecording()" title="Bicara (mic)">🎤</button>
+      <button class="send" id="sendBtn" onclick="send()">➤</button>
+    </div>
+    <div class="hint">Enter kirim · Shift+Enter baris baru · pilih model di kanan · model dipakai sesuai pilihan Anda</div>
+  </div>
+</main>
+
+<button class="scroll-bottom" id="scrollBottom" onclick="scrollToBottom(true)" title="Ke bawah">↓</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.2/markdown-it.min.js"></script>
+<script src="/vendor/xterm.js"></script>
+<script src="/vendor/addon-fit.js"></script>
+<script>
+  const md = window.markdownit({
+    highlight: function (str, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try { return '<pre><div class="code-head"><span>' + lang + '</span><button onclick="copyCode(this)">⧉ copy</button></div><code class="hljs">' + hljs.highlight(str, { language: lang }).value + '</code></pre>'; }
+        catch (e) {}
+      }
+      return '<pre><div class="code-head"><span>code</span><button onclick="copyCode(this)">⧉ copy</button></div><code>' + md.utils.escapeHtml(str) + '</code></pre>';
+    }
+  });
+
+  const chatInner = document.getElementById('chatInner');
+  const emptyState = document.getElementById('emptyState');
+  let busy = false;
+  let streaming = false;
+  let currentMode = 'auto';
+  let currentModel = '';
+  let currentSessionId = '';
+  let chatHistory = [];
+  let pendingFiles = [];
+  let planSaved = '';
+  let abortCtrl = null;
+
+  // ── Status agent di header ──
+  const agentStatusEl = document.getElementById('agentStatus');
+  const agentStatusText = document.getElementById('agentStatusText');
+  const stopBtn = document.getElementById('stopBtn');
+  function setAgentStatus(state, text) {
+    agentStatusEl.className = 'agent-status' + (state ? ' ' + state : '');
+    agentStatusText.textContent = text || 'siap';
+  }
+
+  function stopStream() {
+    if (abortCtrl) abortCtrl.abort();
+  }
+
+  // ── Tema (dark / light) ──
+  function applyTheme(mode) {
+    document.body.classList.toggle('light', mode === 'light');
+    document.getElementById('themeToggle').textContent = mode === 'light' ? '☀️' : '🌙';
+    try { localStorage.setItem('hfTheme', mode); } catch {}
+  }
+  function toggleTheme() {
+    const isLight = document.body.classList.contains('light');
+    applyTheme(isLight ? 'dark' : 'light');
+  }
+
+  // ── Sidebar mobile ──
+  function toggleSidebar() {
+    const sb = document.querySelector('.sidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    const open = sb.classList.toggle('open');
+    ov.classList.toggle('show', open);
+  }
+  function closeSidebar() {
+    document.querySelector('.sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+
+  // ── Scroll ke bawah ──
+  const chatBodyEl = document.getElementById('chatBody');
+  const scrollBottomBtn = document.getElementById('scrollBottom');
+  let userScrolledUp = false;
+  function checkScroll() {
+    const el = chatBodyEl;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    if (nearBottom) userScrolledUp = false;
+    scrollBottomBtn.classList.toggle('show', userScrolledUp && !nearBottom);
+  }
+  chatBodyEl.addEventListener('scroll', () => {
+    userScrolledUp = true;
+    checkScroll();
+  });
+  function scrollToBottom(smooth) {
+    chatBodyEl.scrollTo({ top: chatBodyEl.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+    userScrolledUp = false;
+    scrollBottomBtn.classList.remove('show');
+  }
+
+  // ── Riwayat: cari ──
+  let lastHistoryData = [];
+  function onHistorySearch(q) {
+    q = (q || '').toLowerCase().trim();
+    const list = document.getElementById('historyList');
+    const empty = document.getElementById('historyEmpty');
+    list.querySelectorAll('.history-item').forEach((el) => el.remove());
+    const filtered = lastHistoryData.filter((s) => (s.title || '').toLowerCase().includes(q));
+    if (empty) empty.style.display = filtered.length ? 'none' : 'block';
+    filtered.forEach((s) => appendHistoryItem(list, s));
+  }
+
+  // ── Terminal (opencode run) ──
+  let termAbort = null;
+  let termBusy = false;
+  const termOutput = document.getElementById('termOutput');
+  const termInput = document.getElementById('termInput');
+  const termRunBtn = document.getElementById('termRunBtn');
+  const termStopBtn = document.getElementById('termStopBtn');
+
+  function switchTab(name) {
+    document.querySelectorAll('#mainTabs .tab').forEach((t) => t.classList.toggle('active', t.dataset.tab === name));
+    const isTerm = name === 'terminal';
+    document.getElementById('chatBody').style.display = isTerm ? 'none' : 'block';
+    document.getElementById('terminalView').classList.toggle('hidden', !isTerm);
+    document.getElementById('inputArea').style.display = isTerm ? 'none' : 'block';
+    if (isTerm) {
+      if (termMode === 'live') {
+        if (liveTerm) { setTimeout(() => { try { liveFit.fit(); liveTerm.focus(); } catch {} }, 60); }
+      } else {
+        termInput.focus();
+      }
+    }
+  }
+
+  function termKey(e) {
+    if (e.key === 'Enter') { e.preventDefault(); runTerminal(); }
+  }
+
+  function termLine(text, cls) {
+    const div = document.createElement('div');
+    div.className = 'term-line' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    termOutput.appendChild(div);
+    termOutput.scrollTop = termOutput.scrollHeight;
+    return div;
+  }
+
+  function clearTerminal() {
+    termOutput.innerHTML = '';
+  }
+
+  async function runTerminal() {
+    if (termBusy) return;
+    const cmd = termInput.value.trim();
+    if (!cmd) return;
+    termInput.value = '';
+    termOutput.querySelector('.term-placeholder')?.remove();
+    termLine('❯ opencode run ' + cmd, 'term-info-line');
+
+    termBusy = true;
+    termRunBtn.disabled = true;
+    termStopBtn.classList.remove('hidden');
+    termAbort = new AbortController();
+
+    const cur = document.createElement('div');
+    cur.className = 'term-line';
+    termOutput.appendChild(cur);
+    let acc = '';
+
+    try {
+      const res = await fetch('/api/terminal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd }),
+        signal: termAbort.signal,
+      });
+      if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+        for (const ev of events) {
+          const line = ev.trim();
+          if (!line.startsWith('data:')) continue;
+          let data; try { data = JSON.parse(line.slice(5).trim()); } catch { continue; }
+          if (data.type === 'terminal_delta') {
+            acc += data.text;
+            cur.textContent = acc;
+            termOutput.scrollTop = termOutput.scrollHeight;
+          } else if (data.type === 'terminal_done') {
+            acc += '\n';
+            cur.textContent = acc;
+            termLine('⏎ selesai (exit ' + (data.exitCode ?? 0) + ')', 'term-info-line');
+          } else if (data.type === 'terminal_error') {
+            cur.textContent = acc;
+            termLine('❌ ' + data.error, 'term-err-line');
+          }
+        }
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        cur.textContent = acc;
+        termLine('⏹ dihentikan oleh Anda', 'term-info-line');
+      } else {
+        cur.textContent = acc;
+        termLine('❌ Gagal terhubung: ' + err.message, 'term-err-line');
+      }
+    }
+
+    termBusy = false;
+    termAbort = null;
+    termRunBtn.disabled = false;
+    termStopBtn.classList.add('hidden');
+    termInput.focus();
+  }
+
+  function stopTerminal() {
+    if (termAbort) termAbort.abort();
+  }
+
+  // ── Terminal interaktif opencode (xterm.js + WebSocket PTY) ──
+  let termMode = 'run';
+  let liveTerm = null;
+  let liveFit = null;
+  let liveWs = null;
+  let liveConnected = false;
+  const liveDot = document.getElementById('liveDot');
+  const liveStatus = document.getElementById('liveStatus');
+  const liveConnectBtn = document.getElementById('liveConnectBtn');
+  const liveTermHost = document.getElementById('liveTerm');
+
+  function setTermMode(mode) {
+    termMode = mode;
+    document.querySelectorAll('.term-mode').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
+    document.getElementById('termRunPanel').classList.toggle('hidden', mode !== 'run');
+    document.getElementById('termLivePanel').classList.toggle('hidden', mode !== 'live');
+    if (mode === 'live') {
+      if (!liveTerm) initLiveTerm();
+      setTimeout(() => { try { liveFit.fit(); liveTerm.focus(); } catch {} }, 50);
+    } else if (mode === 'run') {
+      termInput.focus();
+    }
+  }
+
+  function initLiveTerm() {
+    liveTerm = new window.Terminal({
+      cursorBlink: true,
+      fontSize: 13,
+      fontFamily: '"JetBrains Mono", monospace',
+      theme: { background: '#0a0d14', foreground: '#c9d4e4', cursor: '#5b8cff' },
+      scrollback: 5000,
+    });
+    liveFit = new window.FitAddon.FitAddon();
+    liveTerm.loadAddon(liveFit);
+    liveTerm.open(liveTermHost);
+    liveFit.fit();
+    liveTerm.onData((data) => {
+      if (liveWs && liveWs.readyState === WebSocket.OPEN) {
+        liveWs.send(JSON.stringify({ type: 'input', data }));
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (liveTerm && liveConnected) { try { liveFit.fit(); } catch {} }
+    });
+    new ResizeObserver(() => {
+      if (liveTerm && liveConnected) { try { liveFit.fit(); } catch {} }
+    }).observe(liveTermHost);
+  }
+
+  function setLiveStatus(state, text) {
+    liveDot.className = 'live-dot' + (state ? ' ' + state : '');
+    liveStatus.textContent = text;
+  }
+
+  function sendResize() {
+    if (liveWs && liveWs.readyState === WebSocket.OPEN && liveTerm) {
+      liveWs.send(JSON.stringify({ type: 'resize', cols: liveTerm.cols, rows: liveTerm.rows }));
+    }
+  }
+
+  function toggleLive() {
+    if (liveConnected) { liveWs.close(); return; }
+    liveConnectBtn.disabled = true;
+    setLiveStatus('busy', 'Menghubungkan…');
+    liveTerm.reset();
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${location.host}/ws/pty`);
+    liveWs = ws;
+    ws.onopen = () => {
+      liveConnected = true;
+      liveConnectBtn.disabled = false;
+      liveConnectBtn.textContent = '⏻ Putuskan';
+      setLiveStatus('on', 'Terhubung — opencode berjalan');
+      sendResize();
+      liveTerm.focus();
+    };
+    ws.onmessage = (ev) => {
+      let msg; try { msg = JSON.parse(ev.data); } catch { return; }
+      if (msg.type === 'data') liveTerm.write(msg.text);
+      else if (msg.type === 'exit') {
+        liveTerm.write('\r\n\x1b[2m-- opencode keluar (exit ' + msg.exitCode + ') --\x1b[0m\r\n');
+        liveWs = null;
+        liveConnected = false;
+        liveConnectBtn.disabled = false;
+        liveConnectBtn.textContent = '🔌 Hubungkan';
+        setLiveStatus('', 'Terputus — opencode keluar');
+      } else if (msg.type === 'error') {
+        liveTerm.write('\r\n\x1b[31m' + (msg.message || 'Error') + '\x1b[0m\r\n');
+        liveWs = null;
+        liveConnected = false;
+        liveConnectBtn.disabled = false;
+        liveConnectBtn.textContent = '🔌 Hubungkan';
+        setLiveStatus('', 'Terputus — error');
+      }
+    };
+    ws.onclose = () => {
+      if (liveWs === ws) liveWs = null;
+      liveConnected = false;
+      liveConnectBtn.disabled = false;
+      liveConnectBtn.textContent = '🔌 Hubungkan';
+      setLiveStatus('', liveStatus.textContent.includes('Terputus') ? liveStatus.textContent : 'Terputus — koneksi ditutup');
+    };
+    ws.onerror = () => { ws.close(); };
+  }
+
+  // ── Upload Media (gambar/video/audio/font) ──
+  async function handleFiles(input) {
+    const files = Array.from(input.files || []);
+    input.value = '';
+    for (const f of files) {
+      await uploadFile(f);
+    }
+  }
+
+  async function uploadFile(file) {
+    const chip = addAttachChip(null, file.name, file.size);
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'X-File-Name': encodeURIComponent(file.name) },
+        body: file,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.path) throw new Error(data.error || 'Upload gagal');
+      const meta = { name: data.name, path: data.path, url: data.url, size: data.size, ext: data.ext };
+      pendingFiles.push(meta);
+      updateChip(chip, meta);
+    } catch (err) {
+      chip.innerHTML = '❌ ' + file.name + ' (' + err.message + ')';
+    }
+  }
+
+  function isPreviewable(ext) {
+    return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'avif', 'ico', 'svg'].includes(ext);
+  }
+
+  function addAttachChip(meta, name, size) {
+    const box = document.getElementById('attachPreview');
+    const chip = document.createElement('div');
+    chip.className = 'attach-chip';
+    if (meta && isPreviewable(meta.ext)) {
+      chip.innerHTML = '<img class="a-thumb" src="' + meta.url + '">';
+    } else {
+      const icon = meta ? (['mp4', 'webm', 'mov', 'mkv', 'avi'].includes(meta.ext) ? '🎬' : ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(meta.ext) ? '🎵' : ['ttf', 'otf', 'woff', 'woff2'].includes(meta.ext) ? '🔤' : '📄') : '⏳';
+      chip.innerHTML = '<span style="font-size:18px">' + icon + '</span>';
+    }
+    const nameEl = document.createElement('span');
+    nameEl.className = 'a-name';
+    nameEl.textContent = meta ? (meta.name || name) : (name + ' …');
+    nameEl.title = name;
+    chip.appendChild(nameEl);
+    if (meta) {
+      const sizeEl = document.createElement('span');
+      sizeEl.className = 'a-size';
+      sizeEl.textContent = formatBytes(meta.size);
+      chip.appendChild(sizeEl);
+    }
+    const x = document.createElement('button');
+    x.className = 'a-x';
+    x.textContent = '✕';
+    x.onclick = () => {
+      chip.remove();
+      if (meta) pendingFiles = pendingFiles.filter((p) => p.path !== meta.path);
+    };
+    chip.appendChild(x);
+    box.appendChild(chip);
+    return chip;
+  }
+
+  function updateChip(chip, meta) {
+    chip.innerHTML = '';
+    if (isPreviewable(meta.ext)) {
+      const img = document.createElement('img');
+      img.className = 'a-thumb';
+      img.src = meta.url;
+      chip.appendChild(img);
+    } else {
+      const icon = ['mp4', 'webm', 'mov', 'mkv', 'avi'].includes(meta.ext) ? '🎬' : ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(meta.ext) ? '🎵' : ['ttf', 'otf', 'woff', 'woff2'].includes(meta.ext) ? '🔤' : '📄';
+      const span = document.createElement('span');
+      span.style.fontSize = '18px';
+      span.textContent = icon;
+      chip.appendChild(span);
+    }
+    const nameEl = document.createElement('span');
+    nameEl.className = 'a-name';
+    nameEl.textContent = meta.name;
+    nameEl.title = meta.name;
+    chip.appendChild(nameEl);
+    const sizeEl = document.createElement('span');
+    sizeEl.className = 'a-size';
+    sizeEl.textContent = formatBytes(meta.size);
+    chip.appendChild(sizeEl);
+    const x = document.createElement('button');
+    x.className = 'a-x';
+    x.textContent = '✕';
+    x.onclick = () => {
+      chip.remove();
+      pendingFiles = pendingFiles.filter((p) => p.path !== meta.path);
+    };
+    chip.appendChild(x);
+  }
+
+  function formatBytes(b) {
+    if (!b && b !== 0) return '';
+    if (b < 1024) return b + ' B';
+    if (b < 1024 * 1024) return (b / 1024).toFixed(1) + ' KB';
+    return (b / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // ── Riwayat Chat (memori) ──
+  async function refreshHistory(activeId) {
+    try {
+      const res = await fetch('/api/history');
+      const data = await res.json();
+      const list = document.getElementById('historyList');
+      const empty = document.getElementById('historyEmpty');
+      const sessions = (data.sessions || []).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+      lastHistoryData = sessions;
+      list.querySelectorAll('.history-item').forEach((el) => el.remove());
+      if (empty) empty.style.display = sessions.length ? 'none' : 'block';
+      sessions.forEach((s) => appendHistoryItem(list, s, activeId));
+    } catch (e) {
+      console.warn('Gagal load riwayat:', e);
+    }
+  }
+
+  function appendHistoryItem(list, s, activeId) {
+    const item = document.createElement('div');
+    item.className = 'history-item' + (s.id === activeId ? ' active' : '');
+    item.innerHTML = '<span class="h-title"></span><button class="h-del" title="Hapus">×</button>';
+    item.querySelector('.h-title').textContent = s.title || 'Percakapan';
+    item.querySelector('.h-title').title = s.title || '';
+    item.querySelector('.h-title').onclick = () => loadSession(s.id);
+    item.querySelector('.h-del').onclick = (e) => { e.stopPropagation(); deleteSession(s.id); };
+    list.appendChild(item);
+  }
+
+  async function loadSession(id) {
+    try {
+      const res = await fetch('/api/history/' + id);
+      const s = await res.json();
+      if (!s || s.error) return;
+      currentSessionId = s.id;
+      chatHistory = (s.messages || []).map((m) => ({ role: m.role, content: m.content }));
+      // Tampilkan ulang percakapan
+      chatInner.innerHTML = '';
+      showEmpty(false);
+      (s.messages || []).forEach((m) => {
+        const bubble = addMsg(m.role === 'assistant' ? 'ai' : 'user');
+        if (m.role === 'user') bubble.textContent = m.content;
+        else renderInto(bubble, m.content);
+      });
+      refreshHistory(s.id);
+      chatInner.scrollTop = chatInner.scrollHeight;
+    } catch (e) {
+      console.warn('Gagal buka sesi:', e);
+    }
+  }
+
+  async function deleteSession(id) {
+    if (!confirm('Hapus riwayat percakapan ini?')) return;
+    try {
+      await fetch('/api/history/' + id, { method: 'DELETE' });
+      if (id === currentSessionId) {
+        currentSessionId = '';
+        chatHistory = [];
+        newChat();
+      }
+      refreshHistory(currentSessionId);
+    } catch (e) {
+      console.warn('Gagal hapus sesi:', e);
+    }
+  }
+
+  async function clearAllHistory() {
+    if (!confirm('Hapus SEMUA riwayat chat? Tindakan ini tidak bisa dibatalkan.')) return;
+    try {
+      await fetch('/api/history', { method: 'DELETE' });
+      currentSessionId = '';
+      chatHistory = [];
+      newChat();
+      refreshHistory('');
+    } catch (e) {
+      console.warn('Gagal hapus semua:', e);
+    }
+  }
+
+  // ── Load daftar model gratis dari server ──
+  (async function loadModels() {
+    try {
+      const res = await fetch('/api/models');
+      const data = await res.json();
+      currentModel = '';
+      const sel = document.getElementById('modelSelect');
+      sel.innerHTML = '';
+      // Opsi placeholder: tidak ada model default; user wajib memilih.
+      const ph = document.createElement('option');
+      ph.value = '';
+      ph.textContent = '— pilih model —';
+      ph.selected = true;
+      sel.appendChild(ph);
+      // Kelompokkan model per provider agar dropdown lebih rapi & mudah dipilih.
+      const groups = {};
+      data.models.forEach((m) => {
+        if (m.disabled) return; // model tidak valid untuk akun → jangan tampilkan
+        (groups[m.provider] = groups[m.provider] || []).push(m);
+      });
+      const groupNames = { gemini: 'Gemini', openrouter: 'OpenRouter', groq: 'Groq', cerebras: 'Cerebras' };
+      Object.keys(groups).forEach((provider) => {
+        const og = document.createElement('optgroup');
+        og.label = groupNames[provider] || provider;
+        groups[provider].forEach((m) => {
+          const opt = document.createElement('option');
+          opt.value = m.id;
+          const badge = m.cooldown > 0 ? ` (limit, ${m.cooldown}s)` : '';
+          const noKey = m.ready === false ? ' (⚠️ tanpa key)' : '';
+          opt.textContent = m.label + noKey + badge;
+          opt.title = m.desc;
+          if (m.ready === false) opt.disabled = true;
+          og.appendChild(opt);
+        });
+        sel.appendChild(og);
+      });
+      updateChatMeta();
+    } catch (e) {
+      console.warn('Gagal load model:', e);
+    }
+  })();
+
+  function onModelChange(id) {
+    currentModel = id;
+    updateChatMeta();
+  }
+
+  // Tampilkan di pojok kanan atas model yang SEDANG dipilih di dropdown.
+  // Jelas: placeholder = belum pilih; opencode = mode khusus (tak pakai model).
+  function updateChatMeta() {
+    const meta = document.getElementById('chatMeta');
+    if (!meta) return;
+    const sel = document.getElementById('modelSelect');
+    const opt = sel && sel.selectedOptions && sel.selectedOptions[0];
+    const label = opt && opt.value ? opt.textContent.replace(/\s*\(.*\)\s*$/, '') : '';
+    if (currentMode === 'opencode') {
+      meta.textContent = 'mode: opencode (tanpa model)';
+    } else if (label) {
+      meta.textContent = 'model: ' + label;
+    } else {
+      meta.textContent = 'pilih model di dropdown';
+    }
+  }
+
+  // ── Speech Recognition (mic) ──
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  let isRecording = false;
+  if (SR) {
+    recognition = new SR();
+    recognition.lang = 'id-ID';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.onstart = () => {
+      isRecording = true;
+      document.getElementById('micBtn').classList.add('recording');
+      document.getElementById('micBtn').title = 'Berhenti bicara';
+    };
+    recognition.onend = () => {
+      isRecording = false;
+      document.getElementById('micBtn').classList.remove('recording');
+      document.getElementById('micBtn').title = 'Bicara (mic)';
+    };
+    recognition.onresult = (e) => {
+      const input = document.getElementById('userInput');
+      let text = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        text += e.results[i][0].transcript;
+      }
+      input.value = text;
+      autoResize(input);
+      if (e.results[e.results.length - 1].isFinal) {
+        recognition.stop();
+        send();
+      }
+    };
+    recognition.onerror = (e) => {
+      console.warn('Mic error:', e.error);
+      if (e.error === 'not-allowed') alert('Izin mic ditolak. Izinkan akses mic di browser.');
+    };
+  } else {
+    document.getElementById('micBtn').style.display = 'none';
+  }
+
+  function toggleRecording() {
+    if (!recognition) { alert('Browser tidak mendukung mic. Gunakan Chrome/Edge.'); return; }
+    if (isRecording) { recognition.stop(); return; }
+    try { recognition.start(); } catch (e) { /* sudah berjalan */ }
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-chip').forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+    updateChatMeta();
+  }
+
+  function copyCode(btn) {
+    const code = btn.parentElement.nextElementSibling.innerText;
+    navigator.clipboard.writeText(code);
+    btn.textContent = '✓ copied';
+    setTimeout(() => btn.textContent = '⧉ copy', 1500);
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+  }
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  }
+  function newChat() {
+    if (abortCtrl) abortCtrl.abort();
+    currentSessionId = '';
+    chatHistory = [];
+    chatInner.innerHTML = '';
+    chatInner.appendChild(emptyState);
+    emptyState.style.display = 'block';
+    refreshHistory('');
+    stopBtn.classList.add('hidden');
+    setAgentStatus('', 'siap');
+    document.getElementById('sendBtn').disabled = false;
+    try { localStorage.removeItem('hfDraft'); } catch {}
+  }
+  function quick(text) { document.getElementById('userInput').value = text; send(); }
+
+  function showEmpty(s) { if (emptyState) emptyState.style.display = s ? 'block' : 'none'; }
+
+  function addMsg(role) {
+    const row = document.createElement('div');
+    row.className = 'msg' + (role === 'user' ? ' msg-user' : '');
+    row.innerHTML = '<div class="avatar ' + role + '">' + (role === 'user' ? '👤' : '🤖') + '</div>' +
+      '<div class="msg-content"><div class="msg-name">' + (role === 'user' ? 'Anda' : 'NANDO AGENT AI') + '</div>' +
+      '<div class="bubble"></div></div>';
+    if (role === 'ai') {
+      const actions = document.createElement('div');
+      actions.className = 'msg-actions';
+      actions.innerHTML =
+        '<button class="msg-action" title="Salin jawaban" onclick="copyMsg(this)">⧉</button>' +
+        '<button class="msg-action regen" title="Jawab ulang" onclick="regenerate(this)">🔄</button>' +
+        '<button class="msg-action" title="Bagus" onclick="feedback(this,1)">👍</button>' +
+        '<button class="msg-action" title="Kurang" onclick="feedback(this,-1)">👎</button>';
+      row.querySelector('.msg-content').appendChild(actions);
+    }
+    chatInner.appendChild(row);
+    chatInner.scrollTop = chatInner.scrollHeight;
+    return row.querySelector('.bubble');
+  }
+
+  // ── Aksi pesan: salin / regenerate / feedback ──
+  function copyMsg(btn) {
+    const row = btn.closest('.msg');
+    const text = row.querySelector('.bubble').innerText;
+    navigator.clipboard.writeText(text);
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = '⧉', 1200);
+  }
+
+  function regenerate(btn) {
+    const row = btn.closest('.msg');
+    const prev = row.previousElementSibling;
+    const text = prev && prev.classList.contains('msg-user')
+      ? prev.querySelector('.bubble').innerText
+      : '';
+    if (text) {
+      row.remove();
+      if (prev) prev.remove();
+      chatHistory = chatHistory.filter((m) => m.content !== text);
+      chatHistory = chatHistory.slice(0, -1); // hapus jawaban lama
+      document.getElementById('userInput').value = text;
+      autoResize(document.getElementById('userInput'));
+      send();
+    }
+  }
+
+  function feedback(btn, val) {
+    const row = btn.closest('.msg');
+    const isOn = btn.classList.toggle('feedback-on');
+    const other = row.querySelectorAll('.msg-action.feedback-on');
+    other.forEach((b) => { if (b !== btn) b.classList.remove('feedback-on'); });
+    if (isOn) {
+      try {
+        const fb = JSON.parse(localStorage.getItem('hfFeedback') || '{}');
+        fb[chatHistory[chatHistory.length - 1]?.content || Date.now()] = val;
+        localStorage.setItem('hfFeedback', JSON.stringify(fb));
+      } catch {}
+    }
+  }
+
+  // ── Saran tindak lanjut (chips) ──
+  function addSuggestions(row, lastUserText) {
+    const content = row.querySelector('.msg-content');
+    if (content.querySelector('.suggestions')) return;
+    const box = document.createElement('div');
+    box.className = 'suggestions';
+    const sugs = [
+      'Perjelas jawabanmu',
+      'Buat video dari ini',
+      'Tampilkan contoh kode',
+      'Ringkas dalam 3 poin',
+    ];
+    sugs.forEach((s) => {
+      const chip = document.createElement('button');
+      chip.className = 'sugg-chip';
+      chip.textContent = s;
+      chip.onclick = () => quick(s + (lastUserText ? ' (tentang: ' + lastUserText.slice(0, 40) + ')' : ''));
+      box.appendChild(chip);
+    });
+    content.appendChild(box);
+  }
+
+  // ── Draft auto-save (debounced) ──
+  const draftInput = document.getElementById('userInput');
+  let draftTimer = null;
+  draftInput.addEventListener('input', () => {
+    if (draftTimer) clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => { try { localStorage.setItem('hfDraft', draftInput.value); } catch {} }, 400);
+  });
+
+  function renderInto(bubble, text) {
+    // escape html untuk mencegah XSS dari hasil tool, tapi markdownit sudah escape
+    bubble.innerHTML = md.render(text);
+    // hilangkan kursor
+    bubble.querySelectorAll('.cursor-blink').forEach(e => e.remove());
+  }
+
+  // ── Panel agentic (plan / reasoning / verify) ──
+  function addAgentPanel(type, title, row) {
+    const content = row.querySelector('.msg-content');
+    let panel = content.querySelector('.agent-panel.' + type);
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.className = 'agent-panel ' + type;
+      const head = document.createElement('div');
+      head.className = 'ap-head';
+      head.innerHTML = '<span class="ap-icon"></span><span class="ap-title"></span><span class="ap-status"></span>';
+      const body = document.createElement('div');
+      body.className = 'ap-body';
+      panel.appendChild(head);
+      panel.appendChild(body);
+      content.appendChild(panel);
+      head.onclick = () => panel.classList.toggle('collapsed');
+      panel.querySelector('.ap-title').textContent = title;
+    }
+    const body = panel.querySelector('.ap-body');
+    const status = panel.querySelector('.ap-status');
+    return { panel, body, status, head: panel.querySelector('.ap-head') };
+  }
+
+  function agentPanelText(type, title, text, row, opts) {
+    const { panel, body, status } = addAgentPanel(type, title, row);
+    panel.querySelector('.ap-icon').textContent = opts && opts.done ? '✅' : '🔄';
+    if (opts && opts.done) status.textContent = 'selesai';
+    else if (opts && opts.error) status.textContent = 'gagal';
+    else status.innerHTML = '<span class="ap-spin"></span>';
+    body.textContent = text;
+    chatInner.scrollTop = chatInner.scrollHeight;
+  }
+
+  function setStreamingBubble() {
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = '<span class="thinking"><span class="tdots"><span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></span>agent sedang berpikir</span>';
+    const row = document.createElement('div');
+    row.className = 'msg';
+    row.innerHTML = '<div class="avatar ai">🤖</div><div class="msg-content"><div class="msg-name">NANDO AGENT AI</div></div>';
+    row.querySelector('.msg-content').appendChild(bubble);
+    chatInner.appendChild(row);
+    chatInner.scrollTop = chatInner.scrollHeight;
+    return { row, bubble };
+  }
+
+  function addToolPill(row, name, args) {
+    const content = row.querySelector('.msg-content');
+    const pill = document.createElement('div');
+    pill.className = 'tool-pill' + (name === 'run_command' ? ' terminal' : '');
+    if (name === 'run_command') {
+      const cmd = args && args.command ? args.command : '';
+      pill.innerHTML = '<span class="pulse-dot"></span><span class="tool-name">$</span> <span class="cmd"></span>';
+      pill.querySelector('.cmd').textContent = cmd;
+    } else {
+      pill.innerHTML = '<span class="spinner"></span><span class="tool-name">' + name + '</span><span>' + JSON.stringify(args) + '</span>';
+    }
+    content.appendChild(pill);
+    chatInner.scrollTop = chatInner.scrollHeight;
+    return pill;
+  }
+
+  function finishToolPill(pill, result) {
+    const sp = pill.querySelector('.spinner');
+    const pd = pill.querySelector('.pulse-dot');
+    if (sp) sp.remove();
+    if (pd) pd.remove();
+    // Tampilkan pratinjau gambar/SVG bila hasil tool menyertakan preview
+    if (result && result.preview) {
+      const wrap = document.createElement('div');
+      wrap.className = 'tool-preview';
+      const img = document.createElement('img');
+      img.src = result.preview;
+      img.alt = result.name || 'preview';
+      img.onclick = () => window.open(result.preview, '_blank');
+      wrap.appendChild(img);
+      const cap = document.createElement('div');
+      cap.className = 'tool-preview-cap';
+      cap.textContent = (result.path || result.name || '') + ' — klik untuk perbesar';
+      wrap.appendChild(cap);
+      pill.appendChild(wrap);
+      chatInner.scrollTop = chatInner.scrollHeight;
+      return;
+    }
+    const res = document.createElement('div');
+    res.className = 'tool-result';
+    let txt = JSON.stringify(result);
+    res.textContent = txt.length > 600 ? txt.slice(0, 600) + '…' : txt;
+    pill.appendChild(res);
+    chatInner.scrollTop = chatInner.scrollHeight;
+  }
+
+  async function send() {
+    if (busy) return;
+    const input = document.getElementById('userInput');
+    let msg = input.value.trim();
+    if (!msg && pendingFiles.length === 0) return;
+    input.value = ''; input.style.height = 'auto';
+
+    // Lampirkan media yang diupload ke pesan
+    let mediaNote = '';
+    const userText = msg;
+    if (pendingFiles.length) {
+      mediaNote = '\n\n📎 MEDIA DIUPLOAD (path relatif untuk dipakai di komponen Remotion via staticFile):\n' +
+        pendingFiles.map((f) => `- media/${f.name} (${f.ext}, ${formatBytes(f.size)})`).join('\n');
+      msg = (msg ? msg + mediaNote : 'Gunakan media berikut: ' + mediaNote);
+    }
+    const filesToSend = pendingFiles.slice();
+    pendingFiles = [];
+    document.getElementById('attachPreview').innerHTML = '';
+
+    showEmpty(false);
+    const userBubble = addMsg('user');
+    userBubble.textContent = userText || '(lampiran media)';
+    if (mediaNote) {
+      const previews = document.createElement('div');
+      previews.className = 'media-previews';
+      filesToSend.forEach((f) => {
+        const box = document.createElement('div');
+        box.className = 'media-box';
+        if (isPreviewable(f.ext)) {
+          const img = document.createElement('img');
+          img.src = f.url;
+          box.appendChild(img);
+        } else {
+          const span = document.createElement('span');
+          span.textContent = f.name;
+          box.appendChild(span);
+        }
+        previews.appendChild(box);
+      });
+      userBubble.parentElement.appendChild(previews);
+    }
+    const { row, bubble } = setStreamingBubble();
+    busy = true;
+    document.getElementById('sendBtn').disabled = true;
+    setAgentStatus('thinking', 'berpikir');
+    stopBtn.classList.remove('hidden');
+
+    // Pastikan ada sesi aktif untuk menyimpan percakapan
+    if (!currentSessionId) {
+      try {
+        const cres = await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: msg.slice(0, 80) })
+        });
+        const cdata = await cres.json();
+        currentSessionId = cdata.id || '';
+      } catch (e) {
+        console.warn('Gagal buat sesi:', e);
+      }
+    }
+
+    // streaming buffer: render markdown hanya saat delta berhenti singkat
+    let acc = '';
+    let renderTimer = null;
+    const scheduleRender = () => {
+      if (renderTimer) clearTimeout(renderTimer);
+      renderTimer = setTimeout(() => {
+        renderInto(bubble, acc);
+        chatInner.scrollTop = chatInner.scrollHeight;
+      }, 80);
+    };
+
+    try {
+      abortCtrl = new AbortController();
+
+      // ── Mode Opencode: kirim perintah langsung ke opencode run ──
+      if (currentMode === 'opencode') {
+        setAgentStatus('busy', 'menjalankan opencode');
+        let res = await fetch('/api/terminal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: userText }),
+          signal: abortCtrl.signal,
+        });
+        if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let terminalText = '';
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const events = buffer.split('\n\n');
+          buffer = events.pop() || '';
+          for (const ev of events) {
+            const line = ev.trim();
+            if (!line.startsWith('data:')) continue;
+            let data; try { data = JSON.parse(line.slice(5).trim()); } catch { continue; }
+            if (data.type === 'terminal_delta') {
+              terminalText += data.text;
+              acc = terminalText;
+              setAgentStatus('busy', 'menjalankan opencode');
+              scheduleRender();
+            } else if (data.type === 'terminal_done') {
+              setAgentStatus('thinking', 'selesai');
+            } else if (data.type === 'terminal_error') {
+              acc = '❌ ' + data.error;
+            }
+          }
+        }
+        if (renderTimer) clearTimeout(renderTimer);
+        renderInto(bubble, acc);
+        row.querySelectorAll('.cursor-blink').forEach(e => e.remove());
+        chatInner.scrollTop = chatInner.scrollHeight;
+        bubble.classList.add('stream-fade');
+        if (!acc.startsWith('❌')) addSuggestions(row, userText);
+        chatHistory.push({ role: 'user', content: msg });
+        chatHistory.push({ role: 'assistant', content: acc.replace(/^❌ Error: /, '') });
+        if (chatHistory.length > 200) chatHistory = chatHistory.slice(-200);
+        refreshHistory(currentSessionId);
+        busy = false; abortCtrl = null;
+        stopBtn.classList.add('hidden');
+        setAgentStatus('', 'siap');
+        document.getElementById('sendBtn').disabled = false;
+        input.focus();
+        return;
+      }
+
+      let res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, mode: currentMode, model: currentModel, sessionId: currentSessionId, history: chatHistory }),
+        signal: abortCtrl.signal,
+      });
+      // Coba sambung ulang sekali bila gagal (bukan karena user abort)
+      if ((!res.ok || !res.body) && !abortCtrl.signal.aborted) {
+        await new Promise((r) => setTimeout(r, 1500));
+        if (abortCtrl.signal.aborted) throw new Error('HTTP ' + res.status);
+        res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, mode: currentMode, model: currentModel, sessionId: currentSessionId, history: chatHistory }),
+          signal: abortCtrl.signal,
+        });
+      }
+      if (!res.ok || !res.body) throw new Error('HTTP ' + res.status);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let lastEventAt = Date.now();
+      let watchdogFired = false;
+      const watchdog = setInterval(() => {
+        if (Date.now() - lastEventAt > 60000 && !abortCtrl.signal.aborted) {
+          watchdogFired = true;
+          abortCtrl.abort();
+        }
+      }, 5000);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split('\n\n');
+        buffer = events.pop() || '';
+        for (const ev of events) {
+          const line = ev.trim();
+          if (!line.startsWith('data:')) continue;
+          lastEventAt = Date.now();
+          let data; try { data = JSON.parse(line.slice(5).trim()); } catch { continue; }
+
+          if (data.type === 'delta') {
+            acc += data.text;
+            setAgentStatus('busy', 'menjawab');
+            scheduleRender();
+          } else if (data.type === 'tool') {
+            if (renderTimer) clearTimeout(renderTimer);
+            addToolPill(row, data.name, data.args);
+            setAgentStatus('tool', data.name === 'run_command' ? 'eksekusi perintah' : 'menggunakan tool');
+          } else if (data.type === 'tool_result') {
+            const pills = row.querySelectorAll('.tool-pill');
+            finishToolPill(pills[pills.length - 1], data.result);
+            setAgentStatus('thinking', 'memproses hasil');
+          } else if (data.type === 'plan_start') {
+            agentPanelText('plan', '📋 Rencana Kerja', 'Menyusun rencana…', row);
+            setAgentStatus('thinking', 'menyusun rencana');
+          } else if (data.type === 'plan_delta' || data.type === 'plan_reasoning') {
+            const { body } = addAgentPanel('plan', '📋 Rencana Kerja', row);
+            body.textContent = (body.textContent || '').replace(/Menyusun rencana…$/, '') + data.text;
+            chatInner.scrollTop = chatInner.scrollHeight;
+          } else if (data.type === 'plan_done') {
+            agentPanelText('plan', '📋 Rencana Kerja', data.text || '(rencana kosong)', row, { done: true });
+            if (data.text) planSaved = data.text;
+            setAgentStatus('thinking', 'mengeksekusi rencana');
+          } else if (data.type === 'plan_error') {
+            agentPanelText('plan', '📋 Rencana Kerja', '❌ Gagal menyusun rencana: ' + data.error, row, { error: true });
+          } else if (data.type === 'reasoning_delta') {
+            const { body } = addAgentPanel('reasoning', '💭 Reasoning', row);
+            body.textContent = (body.textContent || '') + data.text;
+            setAgentStatus('thinking', 'berpikir');
+            chatInner.scrollTop = chatInner.scrollHeight;
+          } else if (data.type === 'verify_start') {
+            agentPanelText('verify', '✅ Verifikasi', 'Memverifikasi hasil…', row);
+            setAgentStatus('busy', 'memverifikasi hasil');
+          } else if (data.type === 'verify_delta') {
+            const { body } = addAgentPanel('verify', '✅ Verifikasi', row);
+            body.textContent = (body.textContent || '').replace(/Memverifikasi hasil…$/, '') + data.text;
+            chatInner.scrollTop = chatInner.scrollHeight;
+          } else if (data.type === 'verify_done') {
+            agentPanelText('verify', '✅ Verifikasi', data.text || '(tidak ada catatan)', row, { done: true });
+          } else if (data.type === 'verify_error') {
+            agentPanelText('verify', '✅ Verifikasi', '❌ ' + data.error, row, { error: true });
+          } else if (data.type === 'done') {
+            acc = data.text || acc;
+            // Pastikan label model selalu mengikuti pilihan terakhir (failover OFF
+            // sehingga model yang dipakai = model yang dipilih).
+            updateChatMeta();
+          } else if (data.type === 'error') {
+            acc = '❌ Error: ' + data.error;
+          }
+        }
+      }
+      clearInterval(watchdog);
+    } catch (err) {
+      clearInterval(watchdog);
+      if (err && err.name === 'AbortError') {
+        acc = watchdogFired ? '⏳ Server tidak merespons (stuck). Coba kirim ulang perintah atau pilih model lain.' : '⏹ Dihentikan oleh Anda.';
+      } else {
+        acc = '❌ Gagal terhubung ke server: ' + err.message;
+      }
+    }
+
+    if (renderTimer) clearTimeout(renderTimer);
+    renderInto(bubble, acc);
+    row.querySelectorAll('.cursor-blink').forEach(e => e.remove());
+    chatInner.scrollTop = chatInner.scrollHeight;
+    bubble.classList.add('stream-fade');
+
+    // Saran tindak lanjut setelah jawaban selesai
+    if (!acc.startsWith('❌') && !acc.startsWith('⏹')) {
+      addSuggestions(row, userText);
+    }
+
+    // Simpan ke memori lokal (server juga menyimpan ke disk)
+    chatHistory.push({ role: 'user', content: msg });
+    chatHistory.push({ role: 'assistant', content: acc.replace(/^❌ Error: /, '').replace(/^⏹ Dihentikan oleh Anda\./, '') });
+    if (chatHistory.length > 200) chatHistory = chatHistory.slice(-200);
+    refreshHistory(currentSessionId);
+
+    busy = false;
+    abortCtrl = null;
+    stopBtn.classList.add('hidden');
+    setAgentStatus('', 'siap');
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+
+  // ── Inisialisasi ──
+  try {
+    const savedTheme = localStorage.getItem('hfTheme');
+    if (savedTheme === 'light') applyTheme('light');
+  } catch {}
+  try {
+    const draft = localStorage.getItem('hfDraft');
+    if (draft) { document.getElementById('userInput').value = draft; autoResize(document.getElementById('userInput')); }
+  } catch {}
+
+  document.getElementById('userInput').focus();
+  refreshHistory('');
+  scrollToBottom(false);
+</script>
+</body>
+</html>

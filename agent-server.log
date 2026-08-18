@@ -1,0 +1,9 @@
+=======================================================
+🤖 NANDO AGENT AI AKTIF!
+📡 Buka browser: http://localhost:5000
+🔀 38 model gratis (6 Gemini, 17 OpenRouter, 8 Groq, 3 Cerebras, 4 Bluesmind)
+🔄 Auto-failover: ON (auto-pindah model saat limit)
+🖥️ Terminal interaktif: ON (ws://localhost:5000/ws/pty)
+📁 Workspace: C:\Users\afina\my-video
+🔑 Gemini: OK · OpenRouter: OK · Groq: OK · Cerebras: OK · Bluesmind: OK
+=======================================================

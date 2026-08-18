@@ -1,0 +1,20 @@
+{
+  "name": "absensi-server",
+  "version": "1.0.0",
+  "description": "Server absensi siswa berbasis Node.js + Express + SQLite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --expose-gc server.js",
+    "dev": "node --watch --expose-gc server.js"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.22.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.22.0",
+    "@vladmandic/face-api": "^1.7.15",
+    "better-sqlite3": "^11.5.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "jpeg-js": "^0.4.4",
+    "pg": "^8.23.0"
+  }
+}

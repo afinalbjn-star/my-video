@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 import requests
 from typing import Optional
 from multi_agent_system import MultiAgentSystem
+from model_router import get_router, ALL_MODELS
 
 # Load environment variables
 load_dotenv()
@@ -36,6 +37,9 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Router model gratis dengan auto-failover
+router = get_router(OPENROUTER_API_KEY)
+
 # Initialize Multi-Agent System
 multi_agent_system = MultiAgentSystem(OPENROUTER_API_KEY)
 
@@ -49,42 +53,41 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 class ChatRequest(BaseModel):
     message: str
     history: Optional[list] = []
+    model: Optional[str] = None
 
 class ChatResponse(BaseModel):
     reply: str
+    model_used: Optional[str] = None
 
-# Helper function to call OpenRouter API
+# Helper function to call OpenRouter API (dengan auto-failover)
 async def call_openrouter(messages: list) -> str:
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "model": "openrouter/free",
-        "messages": messages,
-        "temperature": 0.7
-    }
-    
-    try:
-        response = requests.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        result = response.json()
-        return result["choices"][0]["message"]["content"]
-    except Exception as e:
-        return f"Error: {str(e)}"
+    result = router.call(messages)
+    return result["content"]
 
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return templates.TemplateResponse("index.html", {"request": {}})
 
+@app.get("/api/models")
+async def list_models():
+    """Daftar model gratis + status cooldown/limit tiap model."""
+    return {
+        "default": multi_agent_system.preferred_model or "openrouter/free",
+        "models": router.list_models(),
+        "auto_failover": True,
+    }
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
-    # Gunakan multi-agent system untuk processing
+    # Set model pilihan user (opsional); router akan auto-failover ke model lain
+    # jika model pilihan kena limit kuota.
+    preferred = request.model or None
+    if preferred and not any(m["id"] == preferred for m in ALL_MODELS):
+        preferred = None
     try:
-        reply = await multi_agent_system.process_request(request.message, request.history)
-        return ChatResponse(reply=reply)
+        reply = await multi_agent_system.process_request(request.message, request.history, preferred)
+        return ChatResponse(reply=reply, model_used=multi_agent_system.last_model_used)
     except Exception as e:
         # Fallback ke simple chat jika multi-agent gagal
         messages = [
@@ -93,7 +96,7 @@ async def chat(request: ChatRequest):
         ]
         
         reply = await call_openrouter(messages)
-        return ChatResponse(reply=reply)
+        return ChatResponse(reply=reply, model_used=multi_agent_system.last_model_used)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -146,6 +149,7 @@ async def list_uploads():
 @app.post("/agent/coder")
 async def coder_agent(request: ChatRequest):
     """Direct access to Coder Agent with enhanced file operations"""
+    multi_agent_system.agents['coder'].preferred_model = request.model or None
     try:
         result = await multi_agent_system.agents['coder'].execute(
             request.message, 
@@ -177,6 +181,7 @@ async def coder_agent(request: ChatRequest):
 @app.post("/agent/searcher")
 async def searcher_agent(request: ChatRequest):
     """Direct access to Searcher Agent"""
+    multi_agent_system.agents['searcher'].preferred_model = request.model or None
     try:
         result = await multi_agent_system.agents['searcher'].execute(request.message)
         return {"reply": result}
@@ -186,6 +191,7 @@ async def searcher_agent(request: ChatRequest):
 @app.post("/agent/analyzer")
 async def analyzer_agent(request: ChatRequest):
     """Direct access to Analyzer Agent"""
+    multi_agent_system.agents['analyzer'].preferred_model = request.model or None
     try:
         result = await multi_agent_system.agents['analyzer'].execute(
             request.message,
@@ -198,6 +204,7 @@ async def analyzer_agent(request: ChatRequest):
 @app.post("/agent/improver")
 async def improver_agent(request: ChatRequest):
     """Direct access to Self-Improvement Agent"""
+    multi_agent_system.agents['improver'].preferred_model = request.model or None
     try:
         result = await multi_agent_system.agents['improver'].execute(
             request.message,

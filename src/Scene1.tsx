@@ -79,7 +79,7 @@ export const Scene1: React.FC = () => {
 
       {/* Main content */}
       <div style={{ position: 'relative', zIndex: 1, textShadow: '0 0 20px currentColor' }}>
-        Exploring the intersection of technology and humanity in a futuristic world
+        Mengintroduksikan teknologi AI dan manfaatnya dalam kehidupan sehari-hari
       </div>
 
       <style>{`

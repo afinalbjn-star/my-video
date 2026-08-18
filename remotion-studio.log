@@ -1,0 +1,26 @@
+Server ready - Local: [4mhttp://localhost:3000[24m, Network: [4mhttp://192.168.100.30:3000[24m
+Building...
+Built in 12087ms
+[31m[31mAn error occurred in the Studio:[39m[31m[39m
+[31m[41m[37m ReferenceError [39m[31m[49m VolleyballScene is not defined[39m
+[31m[39m
+[31mat [4m./src/KidsVideo/KidsVideoMain.tsx:28:5[24m[39m
+[31m[90m25[39m[31m │ [90m    <ShapesScene />[39m[31m[39m
+[31m[90m26[39m[31m │ [90m</Sequence>[39m[31m[39m
+[31m[90m27[39m[31m │ [90m<Sequence from={1890} durationInFrames={360}>[39m[31m[39m
+[31m28 │     <VolleyballScene />[39m
+[31m[90m29[39m[31m │ [90m</Sequence>[39m[31m[39m
+[31m[90m30[39m[31m │ [90m<Sequence from={2250} durationInFrames={210}>[39m[31m[39m
+[31m[90m31[39m[31m │ [90m    <OutroScene />[39m[31m[39m
+[31m[31mAn error occurred in the Studio:[39m[31m[39m
+[31m[41m[37m Error [39m[31m[49m The "width" prop of the <ThreeCanvas /> component must be a number, but you passed a value of type undefined[39m
+[31m[39m
+[31mat [4m./node_modules/remotion/dist/esm/no-react.mjs:1596[24m[39m
+[31m[90m1593[39m[31m │ [90m// src/validation/validate-dimensions.ts[39m[31m[39m
+[31m[90m1594[39m[31m │ [90mfunction validateDimension(amount, nameOfProp, location) {[39m[31m[39m
+[31m[90m1595[39m[31m │ [90m  if (typeof amount !== "number") {[39m[31m[39m
+[31m1596 │     throw new Error(`The "${nameOfProp}" prop ${location} must be a number, but you passed a value of type ${typeof amount}`);[39m
+[31m[90m1597[39m[31m │ [90m  }[39m[31m[39m
+[31m[90m1598[39m[31m │ [90m  if (isNaN(amount)) {[39m[31m[39m
+[31m[90m1599[39m[31m │ [90m    throw new TypeError(`The "${nameOfProp}" prop ${location} must not be NaN, but is NaN.`);[39m[31m[39m
+To restart - Local: [4mhttp://localhost:3000[24m, Network: [4mhttp://192.168.100.30:3000[24m

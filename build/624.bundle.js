@@ -7,8 +7,9 @@
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   registerFlacEncoder: () => (/* binding */ registerFlacEncoder)
 /* harmony export */ });
-/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3936);
-/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8647);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6103);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3936);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8647);
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
  *
@@ -22,6 +23,9 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
+
+// packages/flac-encoder/src/index.ts
+
 
 // packages/flac-encoder/src/encoder.ts
 
@@ -65,7 +69,7 @@ var FLAC_SAMPLE_RATES = [
   176400,
   192e3
 ];
-var FlacEncoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .CustomAudioEncoder */ .Q5 {
+var FlacEncoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_2__/* .CustomAudioEncoder */ .Q5 {
   constructor() {
     super(...arguments);
     this.worker = null;
@@ -172,7 +176,7 @@ var FlacEncoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .Custo
     assert(this.nextTimestampInSamples !== null);
     for (const p of packets) {
       const data = new Uint8Array(p.encodedData);
-      const packet = new mediabunny__WEBPACK_IMPORTED_MODULE_0__/* .EncodedPacket */ .Z(
+      const packet = new mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .EncodedPacket */ .Z(
         data,
         "key",
         this.nextTimestampInSamples / this.config.sampleRate,
@@ -208,7 +212,7 @@ var registerFlacEncoder = () => {
     return;
   }
   registered = true;
-  (0,mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .registerEncoder */ .kf)(FlacEncoder);
+  (0,mediabunny__WEBPACK_IMPORTED_MODULE_2__/* .registerEncoder */ .kf)(FlacEncoder);
 };
 function assert(x) {
   if (!x) {
@@ -222,7 +226,7 @@ var assertNever = (x) => {
 // packages/flac-encoder/src/index.ts
 var FLAC_ENCODER_LOADED_SYMBOL = Symbol.for("@mediabunny/flac-encoder loaded");
 if (globalThis[FLAC_ENCODER_LOADED_SYMBOL]) {
-  console.error(
+  mediabunny__WEBPACK_IMPORTED_MODULE_0__/* .Logging */ .y._error(
     "[WARNING]\n@mediabunny/flac-encoder was loaded twice. This will likely cause the encoder not to work correctly. Check if multiple dependencies are importing different versions of @mediabunny/flac-encoder, or if something is being bundled incorrectly."
   );
 }

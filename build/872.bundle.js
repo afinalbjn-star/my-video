@@ -7,8 +7,9 @@
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   registerMp3Encoder: () => (/* binding */ registerMp3Encoder)
 /* harmony export */ });
-/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3936);
-/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8647);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6103);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3936);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8647);
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
  *
@@ -27,7 +28,7 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
 
 
 // shared/mp3-misc.ts
-var FRAME_HEADER_SIZE = 4;
+var MP3_FRAME_HEADER_SIZE = 4;
 var SAMPLING_RATES = [44100, 48e3, 32e3];
 var KILOBIT_RATES = [
   // lowSamplingFrequency === 0
@@ -285,12 +286,12 @@ function Worker2() {
 // packages/mp3-encoder/src/index.ts
 var MP3_ENCODER_LOADED_SYMBOL = Symbol.for("@mediabunny/mp3-encoder loaded");
 if (globalThis[MP3_ENCODER_LOADED_SYMBOL]) {
-  console.error(
+  mediabunny__WEBPACK_IMPORTED_MODULE_0__/* .Logging */ .y._error(
     "[WARNING]\n@mediabunny/mp3-encoder was loaded twice. This will likely cause the encoder not to work correctly. Check if multiple dependencies are importing different versions of @mediabunny/mp3-encoder, or if something is being bundled incorrectly."
   );
 }
 globalThis[MP3_ENCODER_LOADED_SYMBOL] = true;
-var Mp3Encoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .CustomAudioEncoder */ .Q5 {
+var Mp3Encoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_2__/* .CustomAudioEncoder */ .Q5 {
   constructor() {
     super(...arguments);
     this.worker = null;
@@ -397,7 +398,7 @@ var Mp3Encoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .Custom
     this.buffer.set(bytes, this.currentBufferOffset);
     this.currentBufferOffset = requiredBufferSize;
     let pos = 0;
-    while (pos <= this.currentBufferOffset - FRAME_HEADER_SIZE) {
+    while (pos <= this.currentBufferOffset - MP3_FRAME_HEADER_SIZE) {
       const word = new DataView(this.buffer.buffer).getUint32(pos, false);
       const header = readMp3FrameHeader(word, null).header;
       if (!header) {
@@ -409,7 +410,7 @@ var Mp3Encoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .Custom
       }
       const data = this.buffer.slice(pos, pos + header.totalSize);
       const duration = header.audioSamplesInFrame / header.sampleRate;
-      this.onPacket(new mediabunny__WEBPACK_IMPORTED_MODULE_0__/* .EncodedPacket */ .Z(data, "key", this.currentTimestamp, duration), this.chunkMetadata);
+      this.onPacket(new mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .EncodedPacket */ .Z(data, "key", this.currentTimestamp, duration), this.chunkMetadata);
       this.chunkMetadata = {};
       this.currentTimestamp += duration;
       pos += header.totalSize;
@@ -441,7 +442,7 @@ var registerMp3Encoder = () => {
     return;
   }
   registered = true;
-  (0,mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .registerEncoder */ .kf)(Mp3Encoder);
+  (0,mediabunny__WEBPACK_IMPORTED_MODULE_2__/* .registerEncoder */ .kf)(Mp3Encoder);
 };
 function assert(x) {
   if (!x) {

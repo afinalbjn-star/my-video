@@ -508,8 +508,12 @@ Audio Voiceover: "${scene.audio_text}"`
     });
 
     if (result.success && result.data?.choices?.[0]) {
-      let content = result.data.choices[0].message.content;
-      return content.replace(/\`\`\`tsx?\n?|\`\`\`/g, '').trim();
+      let content = result.data.choices[0].message.content.trim();
+      if (content.startsWith('```')) {
+        const lines = content.split('\n');
+        content = lines.slice(1, -1).join('\n');
+      }
+      return content.trim();
     }
     return null;
   }
@@ -528,8 +532,12 @@ Audio Voiceover: "${scene.audio_text}"`
     });
 
     if (result.success && result.data?.choices?.[0]) {
-      let content = result.data.choices[0].message.content;
-      return content.replace(/\`\`\`tsx?\n?|\`\`\`/g, '').trim();
+      let content = result.data.choices[0].message.content.trim();
+      if (content.startsWith('```')) {
+        const lines = content.split('\n');
+        content = lines.slice(1, -1).join('\n');
+      }
+      return content.trim();
     }
     return null;
   }
@@ -649,6 +657,7 @@ ${sequences}
       
       // Try to commit (local operation, should work even without GitHub auth)
       try {
+        await this.gitOps.gitAdd(['-A']);
         const commitSuccess = await this.gitOps.gitCommit(commitMessage);
         
         if (commitSuccess) {

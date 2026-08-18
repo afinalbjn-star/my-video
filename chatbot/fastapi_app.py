@@ -13,6 +13,7 @@ from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 import requests
 from typing import Optional
+from model_router import get_router, ALL_MODELS
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +35,9 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+# Router model gratis dengan auto-failover
+router = get_router(OPENROUTER_API_KEY)
+
 # Templates
 templates = Jinja2Templates(directory="templates")
 
@@ -43,45 +47,43 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Data models
 class ChatRequest(BaseModel):
     message: str
+    model: Optional[str] = None
 
 class ChatResponse(BaseModel):
     reply: str
+    model_used: Optional[str] = None
 
-# Helper function to call OpenRouter API
+# Helper function to call OpenRouter API (dengan auto-failover)
 async def call_openrouter(messages: list) -> str:
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {
-        "model": "openrouter/free",
-        "messages": messages,
-        "temperature": 0.7
-    }
-    
-    try:
-        response = requests.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=30)
-        response.raise_for_status()
-        result = response.json()
-        return result["choices"][0]["message"]["content"]
-    except Exception as e:
-        return f"Error: {str(e)}"
+    result = router.call(messages)
+    return result["content"]
 
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     return templates.TemplateResponse("index.html", {"request": {}})
 
+@app.get("/api/models")
+async def list_models():
+    """Daftar model gratis + status cooldown/limit tiap model."""
+    return {
+        "default": "openrouter/free",
+        "models": router.list_models(),
+        "auto_failover": True,
+    }
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
+    preferred = request.model or None
+    if preferred and not any(m["id"] == preferred for m in ALL_MODELS):
+        preferred = None
     messages = [
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": request.message}
     ]
     
-    reply = await call_openrouter(messages)
-    return ChatResponse(reply=reply)
+    result = router.call(messages, preferred=preferred)
+    return ChatResponse(reply=result["content"], model_used=result["model"])
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):

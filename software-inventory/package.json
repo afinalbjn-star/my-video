@@ -1,0 +1,50 @@
+{
+  "name": "nando-inventory-ai",
+  "version": "1.0.0",
+  "description": "NANDO INVENTORY AI - Aplikasi inventaris perangkat lunak",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "serve": "node server.js",
+    "icon": "node generate-icon.js",
+    "dist": "electron-builder --win"
+  },
+  "author": "NANDO",
+  "license": "MIT",
+  "build": {
+    "appId": "com.nando.inventoryai",
+    "productName": "NANDO INVENTORY AI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "pdfkit": "^0.19.1",
+    "pngjs": "^7.0.0"
+  }
+}

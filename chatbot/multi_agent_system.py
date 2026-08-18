@@ -10,28 +10,39 @@ import os
 import json
 import subprocess
 import requests
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from pathlib import Path
 import asyncio
 import aiofiles
+
+from model_router import get_router
 
 class MultiAgentSystem:
     def __init__(self, openrouter_api_key: str):
         self.api_key = openrouter_api_key
         self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        # Router dengan auto-failover: pindah model saat kena limit
+        self.router = get_router(self.api_key)
+        self.preferred_model: Optional[str] = None
+        self.last_model_used: Optional[str] = None
         self.agents = {
-            'coder': CodeAgent(self.api_key, self.base_url),
-            'searcher': SearchAgent(self.api_key, self.base_url),
-            'analyzer': AnalyzerAgent(self.api_key, self.base_url),
-            'improver': SelfImprovementAgent(self.api_key, self.base_url),
-            'coordinator': CoordinatorAgent(self.api_key, self.base_url),
-            'remotion': RemotionAgent(self.api_key, self.base_url),
-            'github': GitHubAgent(self.api_key, self.base_url),
-            'planner': PlannerAgent(self.api_key, self.base_url)
+            'coder': CodeAgent(self.api_key, self.base_url, self.router),
+            'searcher': SearchAgent(self.api_key, self.base_url, self.router),
+            'analyzer': AnalyzerAgent(self.api_key, self.base_url, self.router),
+            'improver': SelfImprovementAgent(self.api_key, self.base_url, self.router),
+            'coordinator': CoordinatorAgent(self.api_key, self.base_url, self.router),
+            'remotion': RemotionAgent(self.api_key, self.base_url, self.router),
+            'github': GitHubAgent(self.api_key, self.base_url, self.router),
+            'planner': PlannerAgent(self.api_key, self.base_url, self.router)
         }
         self.working_directory = r"C:\Users\afina\my-video"
-        
-    async def process_request(self, user_message: str, history: List[Dict[str, str]] = None) -> str:
+
+    async def process_request(self, user_message: str, history: List[Dict[str, str]] = None,
+                              preferred_model: Optional[str] = None) -> str:
+        self.preferred_model = preferred_model
+        # Beri tahu semua agent model pilihan user
+        for agent in self.agents.values():
+            agent.preferred_model = preferred_model
         """Route request ke agent yang sesuai"""
         if history is None:
             history = []
@@ -62,51 +73,22 @@ class MultiAgentSystem:
             return await self.call_openai(messages)
     
     async def call_openai(self, messages: List[Dict[str, str]]) -> str:
-        """Call OpenRouter API"""
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": "openrouter/free",
-            "messages": messages,
-            "temperature": 0.7
-        }
-        
-        try:
-            response = requests.post(self.base_url, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
-        except Exception as e:
-            return f"Error: {str(e)}"
+        """Call OpenRouter API dengan auto-failover antar model gratis."""
+        result = self.router.call(messages, preferred=self.preferred_model)
+        self.last_model_used = result.get("model")
+        return result["content"]
 
 class BaseAgent:
-    def __init__(self, api_key: str, base_url: str):
+    def __init__(self, api_key: str, base_url: str, router=None):
         self.api_key = api_key
         self.base_url = base_url
+        self.router = router or get_router(api_key)
+        self.preferred_model: Optional[str] = None
         
     async def call_openai(self, messages: List[Dict[str, str]]) -> str:
-        """Call OpenRouter API"""
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        payload = {
-            "model": "openrouter/free",
-            "messages": messages,
-            "temperature": 0.7
-        }
-        
-        try:
-            response = requests.post(self.base_url, headers=headers, json=payload, timeout=30)
-            response.raise_for_status()
-            result = response.json()
-            return result["choices"][0]["message"]["content"]
-        except Exception as e:
-            return f"Error: {str(e)}"
+        """Call OpenRouter API dengan auto-failover antar model gratis."""
+        result = self.router.call(messages, preferred=self.preferred_model)
+        return result["content"]
 
 class CodeAgent(BaseAgent):
     """Agent untuk coding mandiri dengan akses file system"""

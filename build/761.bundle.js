@@ -12,13 +12,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   zTextarea: () => (/* binding */ zTextarea)
 /* harmony export */ });
 /* harmony import */ var remotion_no_react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9382);
-/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(2069);
+/* harmony import */ var zod__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6687);
 // src/z-color.ts
 
 
 var REMOTION_COLOR_BRAND = "__remotion-color";
 var parseColor = (value) => {
-  const colored = remotion_no_react__WEBPACK_IMPORTED_MODULE_0__.NoReactInternals.processColor(value).toString(16).padStart(8, "0");
+  const colored = remotion_no_react__WEBPACK_IMPORTED_MODULE_0__/* .NoReactInternals */ .JC.processColor(value).toString(16).padStart(8, "0");
   const opacity = parseInt(colored.slice(0, 2), 16);
   const r = parseInt(colored.slice(2, 4), 16);
   const g = parseInt(colored.slice(4, 6), 16);

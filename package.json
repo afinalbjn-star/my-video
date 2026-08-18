@@ -6,6 +6,7 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
+    "@homebridge/node-pty-prebuilt-multiarch": "^0.14.1",
     "@react-three/drei": "^9.121.4",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.19.1",
@@ -23,6 +24,8 @@
     "@remotion/three": "4.0.503",
     "@remotion/transitions": "4.0.503",
     "@types/uuid": "^10.0.0",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
     "dotenv": "^17.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -30,7 +33,8 @@
     "seedrandom": "^3.0.5",
     "tailwindcss": "4.0.0",
     "three": "^0.172.0",
-    "uuid": "^14.0.1"
+    "uuid": "^14.0.1",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@remotion/eslint-config-flat": "4.0.503",
@@ -41,6 +45,7 @@
     "@types/three": "^0.184.1",
     "@types/web": "0.0.166",
     "@types/webpack-node-externals": "^3.0.4",
+    "electron": "^33.4.11",
     "eslint": "9.19.0",
     "prettier": "3.8.1",
     "tsx": "^4.23.12",
@@ -61,6 +66,7 @@
     "test-fixes": "npx tsx test-fixes.ts",
     "diagnose-github": "npx tsx diagnose-github.ts",
     "website": "npx tsx agent-chat-server.ts",
+    "desktop": "electron desktop/main.js",
     "ai-agent": "npx tsx run-ai-agent.ts",
     "batch-tech-videos": "npx tsx batch-create-tech-videos.ts",
     "push-github": "npx tsx push-to-github.ts"

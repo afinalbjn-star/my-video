@@ -1,0 +1,16 @@
+{
+  "id": "sess-msv8xvxg-yqkvlp",
+  "title": "hai",
+  "createdAt": 1786850984932,
+  "updatedAt": 1786850986030,
+  "messages": [
+    {
+      "role": "user",
+      "content": "hai"
+    },
+    {
+      "role": "assistant",
+      "content": "Halo! Saya **NANDO AGENT AI**, siap membantu Anda mengembangkan proyek video Remotion Anda di `C:\\Users\\afina\\my-video`.\n\nApa yang ingin Anda buat atau kerjakan hari ini? Silakan beri tahu instruksinya, dan saya akan segera memulainya.\n\nJika Anda ingin melihat isi proyek saat ini, saya bisa memulainya dengan `list_directory` di root."
+    }
+  ]
+}

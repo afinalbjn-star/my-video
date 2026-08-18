@@ -1,0 +1,25 @@
+name: absensi_siswa
+description: Aplikasi absensi siswa - scan QR di gerbang masuk.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.2.3
+  http: ^1.2.2
+  mobile_scanner: 7.4.0
+  image_picker: ^1.1.2
+  share_plus: ^10.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

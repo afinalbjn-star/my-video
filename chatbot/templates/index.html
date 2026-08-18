@@ -173,6 +173,9 @@
         <div class="p-4 border-b border-[var(--border-color)] flex items-center justify-between">
             <h1 class="text-xl font-bold">🤖 Chatbot AI Advanced</h1>
             <div class="flex items-center space-x-2">
+                <select id="model-select" class="p-2 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] text-[var(--text-primary)] text-sm max-w-[200px]" title="Pilih model AI (auto-pindah jika limit)">
+                    <option value="">🌀 Auto (pilih otomatis)</option>
+                </select>
                 <button onclick="toggleTheme()" class="p-2 rounded-lg hover:bg-[var(--bg-secondary)] transition">
                     <span id="theme-icon">🌙</span>
                 </button>
@@ -258,33 +261,6 @@
         </div>
     </div>
 
-    <!-- Voice Input Modal -->
-    <div id="voice-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-[var(--bg-primary)] p-6 rounded-lg max-w-md w-full mx-4 text-center">
-            <h3 class="text-lg font-bold mb-4">🎤 Voice Input</h3>
-            <div id="voice-status" class="mb-4">
-                <p class="text-[var(--text-secondary)]">Klik Start untuk mulai merekam suara</p>
-            </div>
-            <div id="voice-transcript" class="mb-4 p-3 bg-[var(--bg-secondary)] rounded-lg min-h-[100px] text-left hidden">
-                <p class="text-sm text-[var(--text-secondary)]">Transkrip:</p>
-                <p id="transcript-text" class="mt-2"></p>
-            </div>
-            <div class="flex space-x-2">
-                <button onclick="startVoiceRecognition()" id="start-voice-btn" class="flex-1 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                    Start
-                </button>
-                <button onclick="stopVoiceRecognition()" id="stop-voice-btn" class="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition hidden">
-                    Stop
-                </button>
-                <button onclick="useVoiceTranscript()" id="use-voice-btn" class="flex-1 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:opacity-90 transition hidden">
-                    Gunakan
-                </button>
-                <button onclick="closeVoiceModal()" class="flex-1 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
-                    Tutup
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Coding Mode Modal -->
     <div id="coding-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -381,6 +357,27 @@
 
         let conversationHistory = [];
 
+        // ── Load daftar model gratis dari server ──
+        async function loadModels() {
+            try {
+                const res = await fetch('/api/models');
+                const data = await res.json();
+                const sel = document.getElementById('model-select');
+                sel.innerHTML = '<option value="">🌀 Auto (pilih otomatis)</option>';
+                (data.models || []).forEach((m) => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    const badge = m.cooldown > 0 ? ` (limit, ${m.cooldown}s)` : '';
+                    opt.textContent = m.label + badge;
+                    opt.title = m.desc || '';
+                    sel.appendChild(opt);
+                });
+            } catch (e) {
+                console.warn('Gagal load model:', e);
+            }
+        }
+        loadModels();
+
         function autoResize(textarea) {
             textarea.style.height = 'auto';
             textarea.style.height = textarea.scrollHeight + 'px';
@@ -431,7 +428,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         message: message,
-                        history: conversationHistory.slice(0, -1)
+                        history: conversationHistory.slice(0, -1),
+                        model: document.getElementById('model-select').value || null
                     })
                 });
                 
@@ -441,7 +439,7 @@
                 document.getElementById('typing-indicator').classList.add('hidden');
                 
                 // Add AI response to UI
-                addMessage('assistant', data.reply);
+                addMessage('assistant', data.reply, data.model_used);
                 conversationHistory.push({ role: 'assistant', content: data.reply });
                 
                 // Update chat history sidebar
@@ -456,7 +454,7 @@
             }
         }
 
-        function addMessage(role, content) {
+        function addMessage(role, content, modelUsed) {
             const container = document.getElementById('messages-container');
             const messageDiv = document.createElement('div');
             messageDiv.className = 'flex items-start space-x-3';
@@ -471,6 +469,14 @@
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
             contentDiv.innerHTML = marked.parse(content);
+            
+            // Tampilkan model yang dipakai (AI saja)
+            if (role !== 'user' && modelUsed) {
+                const modelTag = document.createElement('div');
+                modelTag.className = 'text-xs text-[var(--text-secondary)] mt-2 border-t border-[var(--border-color)] pt-1';
+                modelTag.textContent = `🤖 Model: ${modelUsed}`;
+                bubble.appendChild(modelTag);
+            }
             
             // Add copy buttons to code blocks
             contentDiv.querySelectorAll('pre code').forEach((block) => {
@@ -559,25 +565,18 @@
 
         // Voice Recognition Functions
         let recognition = null;
-        let voiceTranscript = '';
+        let isRecording = false;
 
         function toggleVoiceInput() {
-            document.getElementById('voice-modal').classList.remove('hidden');
-            initVoiceRecognition();
-            
-            // Visual feedback
-            const voiceBtn = document.getElementById('voice-btn');
-            voiceBtn.classList.add('voice-btn-active');
-        }
-
-        function closeVoiceModal() {
-            document.getElementById('voice-modal').classList.add('hidden');
-            if (recognition) {
-                recognition.stop();
+            if (!recognition) {
+                initVoiceRecognition();
             }
-            // Remove active state
-            const voiceBtn = document.getElementById('voice-btn');
-            voiceBtn.classList.remove('voice-btn-active');
+            
+            if (isRecording) {
+                stopVoiceRecognition();
+            } else {
+                startVoiceRecognition();
+            }
         }
 
         function initVoiceRecognition() {
@@ -590,75 +589,75 @@
 
                 recognition.onresult = function(event) {
                     let interimTranscript = '';
+                    let finalTranscript = '';
+                    
                     for (let i = event.resultIndex; i < event.results.length; ++i) {
                         if (event.results[i].isFinal) {
-                            voiceTranscript += event.results[i][0].transcript;
+                            finalTranscript += event.results[i][0].transcript;
                         } else {
                             interimTranscript += event.results[i][0].transcript;
                         }
                     }
                     
-                    document.getElementById('transcript-text').textContent = 
-                        voiceTranscript + interimTranscript;
+                    const inputField = document.getElementById('message-input');
+                    // Jika ada teks final, gabungkan. Jika masih mengetik, tampilkan sementara
+                    if (finalTranscript) {
+                        inputField.value += (inputField.value ? ' ' : '') + finalTranscript;
+                    }
+                    // Kita bisa abaikan interim agar kursor text input tidak kacau,
+                    // atau cukup tampilkan semuanya.
+                    // Untuk kesederhanaan, jika sedang bicara kita update nilainya:
+                    if (interimTranscript) {
+                        // Simpan posisi original text jika diperlukan, tapi untuk simple approach:
+                        // inputField.value akan terus bertambah
+                    }
+                    
+                    autoResize(inputField);
                 };
 
                 recognition.onerror = function(event) {
-                    document.getElementById('voice-status').innerHTML = 
-                        `<p class="text-red-600">Error: ${event.error}</p>`;
+                    console.error("Voice recognition error:", event.error);
+                    stopVoiceRecognition();
+                    const inputField = document.getElementById('message-input');
+                    inputField.placeholder = "Ketik pesan Anda atau klik 🎤 untuk bicara...";
                 };
 
                 recognition.onend = function() {
-                    document.getElementById('start-voice-btn').classList.remove('hidden');
-                    document.getElementById('stop-voice-btn').classList.add('hidden');
-                    const voiceBtn = document.getElementById('voice-btn');
-                    voiceBtn.classList.remove('voice-btn-active');
-                    if (voiceTranscript) {
-                        document.getElementById('use-voice-btn').classList.remove('hidden');
-                        document.getElementById('voice-transcript').classList.remove('hidden');
-                    }
+                    stopVoiceRecognition();
                 };
             } else {
-                document.getElementById('voice-status').innerHTML = 
-                    '<p class="text-red-600">Browser tidak mendukung voice recognition. Gunakan Chrome atau Edge.</p>';
+                alert('Browser tidak mendukung voice recognition. Gunakan Chrome atau Edge.');
             }
         }
 
         function startVoiceRecognition() {
             if (recognition) {
-                voiceTranscript = '';
-                document.getElementById('transcript-text').textContent = '';
-                document.getElementById('voice-transcript').classList.add('hidden');
-                document.getElementById('use-voice-btn').classList.add('hidden');
-                document.getElementById('start-voice-btn').classList.add('hidden');
-                document.getElementById('stop-voice-btn').classList.remove('hidden');
-                document.getElementById('voice-status').innerHTML = 
-                    '<p class="text-green-600">🎤 Mendengarkan... (Berbicara sekarang)</p>';
-                // Add visual feedback to voice button
+                isRecording = true;
                 const voiceBtn = document.getElementById('voice-btn');
                 voiceBtn.classList.add('voice-btn-active');
-                recognition.start();
+                
+                const inputField = document.getElementById('message-input');
+                inputField.placeholder = "Mendengarkan... (Silakan bicara)";
+                
+                try {
+                    recognition.start();
+                } catch (e) {
+                    // Jika sudah started
+                }
             }
         }
 
         function stopVoiceRecognition() {
-            if (recognition) {
+            if (recognition && isRecording) {
+                isRecording = false;
                 recognition.stop();
-                document.getElementById('voice-status').innerHTML = 
-                    '<p class="text-[var(--text-secondary)]">Recording dihentikan</p>';
-                // Remove visual feedback from voice button
+                
                 const voiceBtn = document.getElementById('voice-btn');
                 voiceBtn.classList.remove('voice-btn-active');
-            }
-        }
-
-        function useVoiceTranscript() {
-            if (voiceTranscript) {
-                document.getElementById('message-input').value = voiceTranscript;
-                autoResize(document.getElementById('message-input'));
-                closeVoiceModal();
-                voiceTranscript = '';
-                // Focus input after using transcript
-                setTimeout(() => document.getElementById('message-input').focus(), 100);
+                
+                const inputField = document.getElementById('message-input');
+                inputField.placeholder = "Ketik pesan Anda atau klik 🎤 untuk bicara...";
+                inputField.focus();
             }
         }
 

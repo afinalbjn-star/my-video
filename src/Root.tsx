@@ -1,6 +1,7 @@
 import React from 'react';
 import { Composition } from 'remotion';
 import { AbstractLoopBackground } from './AbstractLoopBackground';
+import AdobeStockTechBackground from './AdobeStockTechBackground';
 import NeonCyberTerrain from './NeonCyberTerrain';
 import GoldenNetworkBackground from './GoldenNetworkBackground';
 import ProfessionalAbstractVideo from './ProfessionalAbstractVideo';
@@ -21,6 +22,15 @@ export const RemotionRoot: React.FC = () => {
 				id="AbstractLoopBackground"
 				component={AbstractLoopBackground}
 				durationInFrames={FPS * 15}
+				fps={FPS}
+				width={VIDEO_WIDTH}
+				height={VIDEO_HEIGHT}
+				defaultProps={{}}
+			/>
+			<Composition
+				id="AdobeStockTechBackground"
+				component={AdobeStockTechBackground}
+				durationInFrames={FPS * 10}
 				fps={FPS}
 				width={VIDEO_WIDTH}
 				height={VIDEO_HEIGHT}

@@ -751,6 +751,8 @@ const createAes128CbcDecryptStream = (reader, getInit, close) => {
     });
 };
 
+// EXTERNAL MODULE: ./node_modules/mediabunny/dist/modules/src/logging.js
+var logging = __webpack_require__(6103);
 ;// ./node_modules/mediabunny/dist/modules/src/isobmff/isobmff-demuxer.js
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
@@ -759,6 +761,7 @@ const createAes128CbcDecryptStream = (reader, getInit, close) => {
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
+
 
 
 
@@ -1309,7 +1312,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                             continue;
                         }
                         if (relevantEntryFound) {
-                            console.warn('Unsupported edit list: multiple edits are not currently supported. Only using first edit.');
+                            logging/* Logging */.y._warn('Unsupported edit list: multiple edits are not currently supported. Only using first edit.');
                             break;
                         }
                         if (mediaTime === -1) {
@@ -1317,7 +1320,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                             continue;
                         }
                         if (mediaRate !== 1) {
-                            console.warn('Unsupported edit list entry: media rate must be 1.');
+                            logging/* Logging */.y._warn('Unsupported edit list entry: media rate must be 1.');
                             break;
                         }
                         track.editListPreviousSegmentDurations = previousSegmentDurations;
@@ -1383,6 +1386,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                             hevcCodecInfo: null,
                             vp9CodecInfo: null,
                             av1CodecInfo: null,
+                            proresFormat: null,
                         };
                     }
                     else if (handlerType === 'soun') {
@@ -1460,11 +1464,15 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                             else if (codecName === 'av01') {
                                 track.info.codec = 'av1';
                             }
+                            else if (codec/* PRORES_FOURCCS */.Y2.includes(lowercaseBoxName)) {
+                                track.info.codec = 'prores';
+                                track.info.proresFormat = lowercaseBoxName;
+                            }
                             else if (codecName === null) {
-                                console.warn(`Unknown encrypted video codec due to missing frma box.`);
+                                logging/* Logging */.y._warn(`Unknown encrypted video codec due to missing frma box.`);
                             }
                             else {
-                                console.warn(`Unsupported video codec (sample entry type '${sampleBoxInfo.name}').`);
+                                logging/* Logging */.y._warn(`Unsupported video codec (sample entry type '${sampleBoxInfo.name}').`);
                             }
                         }
                         else {
@@ -1533,7 +1541,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                     track.info.codec = track.info.pcmLittleEndian ? 'pcm-s16' : 'pcm-s16be';
                                 }
                                 else {
-                                    console.warn(`Unsupported sample size ${sampleSize} for codec 'twos'.`);
+                                    logging/* Logging */.y._warn(`Unsupported sample size ${sampleSize} for codec 'twos'.`);
                                     track.info.codec = null;
                                 }
                             }
@@ -1545,7 +1553,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                     track.info.codec = 'pcm-s16';
                                 }
                                 else {
-                                    console.warn(`Unsupported sample size ${sampleSize} for codec 'sowt'.`);
+                                    logging/* Logging */.y._warn(`Unsupported sample size ${sampleSize} for codec 'sowt'.`);
                                     track.info.codec = null;
                                 }
                             }
@@ -1577,7 +1585,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                         track.info.codec = 'pcm-s32';
                                     }
                                     else {
-                                        console.warn(`Invalid ipcm sample size ${pcmSampleSize}.`);
+                                        logging/* Logging */.y._warn(`Invalid ipcm sample size ${pcmSampleSize}.`);
                                         track.info.codec = null;
                                     }
                                 }
@@ -1592,7 +1600,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                         track.info.codec = 'pcm-s32be';
                                     }
                                     else {
-                                        console.warn(`Invalid ipcm sample size ${pcmSampleSize}.`);
+                                        logging/* Logging */.y._warn(`Invalid ipcm sample size ${pcmSampleSize}.`);
                                         track.info.codec = null;
                                     }
                                 }
@@ -1607,7 +1615,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                         track.info.codec = 'pcm-f64';
                                     }
                                     else {
-                                        console.warn(`Invalid fpcm sample size ${pcmSampleSize}.`);
+                                        logging/* Logging */.y._warn(`Invalid fpcm sample size ${pcmSampleSize}.`);
                                         track.info.codec = null;
                                     }
                                 }
@@ -1619,7 +1627,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                         track.info.codec = 'pcm-f64be';
                                     }
                                     else {
-                                        console.warn(`Invalid fpcm sample size ${pcmSampleSize}.`);
+                                        logging/* Logging */.y._warn(`Invalid fpcm sample size ${pcmSampleSize}.`);
                                         track.info.codec = null;
                                     }
                                 }
@@ -1658,14 +1666,14 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                                     }
                                 }
                                 if (track.info.codec === null) {
-                                    console.warn('Unsupported PCM format.');
+                                    logging/* Logging */.y._warn('Unsupported PCM format.');
                                 }
                             }
                             else if (codecName === null) {
-                                console.warn(`Unknown encrypted audio codec due to missing frma box.`);
+                                logging/* Logging */.y._warn(`Unknown encrypted audio codec due to missing frma box.`);
                             }
                             else {
-                                console.warn(`Unsupported audio codec (sample entry type '${sampleBoxInfo.name}').`);
+                                logging/* Logging */.y._warn(`Unsupported audio codec (sample entry type '${sampleBoxInfo.name}').`);
                             }
                         }
                         slice.filePos = sampleBoxStartPos + sampleBoxInfo.totalSize;
@@ -1706,7 +1714,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                         };
                     }
                     else {
-                        console.warn(`Unsupported encryption scheme '${schemeType}'.`);
+                        logging/* Logging */.y._warn(`Unsupported encryption scheme '${schemeType}'.`);
                     }
                 }
                 ;
@@ -1835,18 +1843,21 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                     }
                     (0,misc/* assert */.vA)(track.info?.type === 'video');
                     const colourType = (0,src_reader/* readAscii */.IT)(slice, 4);
-                    if (colourType !== 'nclx') {
+                    if (colourType !== 'nclx' && colourType !== 'nclc') {
                         break;
                     }
                     const colourPrimaries = (0,src_reader/* readU16Be */.mH)(slice);
                     const transferCharacteristics = (0,src_reader/* readU16Be */.mH)(slice);
                     const matrixCoefficients = (0,src_reader/* readU16Be */.mH)(slice);
-                    const fullRangeFlag = Boolean((0,src_reader/* readU8 */.eo)(slice) & 0x80);
+                    let fullRange = undefined;
+                    if (colourType === 'nclx') {
+                        fullRange = Boolean((0,src_reader/* readU8 */.eo)(slice) & 0x80);
+                    }
                     track.info.colorSpace = {
                         primaries: misc/* COLOR_PRIMARIES_MAP_INVERSE */.BL[colourPrimaries],
                         transfer: misc/* TRANSFER_CHARACTERISTICS_MAP_INVERSE */.x_[transferCharacteristics],
                         matrix: misc/* MATRIX_COEFFICIENTS_MAP_INVERSE */.fl[matrixCoefficients],
-                        fullRange: fullRangeFlag,
+                        fullRange,
                     };
                 }
                 ;
@@ -1923,7 +1934,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                         track.info.codec = 'vorbis'; // "nonstandard, gpac uses it" - FFmpeg
                     }
                     else {
-                        console.warn(`Unsupported audio codec (objectTypeIndication ${objectTypeIndication}) - discarding track.`);
+                        logging/* Logging */.y._warn(`Unsupported audio codec (objectTypeIndication ${objectTypeIndication}) - discarding track.`);
                     }
                     slice.skip(1 + 3 + 4 + 4);
                     if (decoderConfigDescriptorLength > slice.filePos - payloadStart) {
@@ -2088,7 +2099,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                     const bytes = (0,src_reader/* readBytes */.io)(slice, boxInfo.contentSize);
                     const config = (0,codec_data/* parseEac3Config */.Sd)(bytes);
                     if (!config) {
-                        console.warn('Invalid dec3 box contents, ignoring.');
+                        logging/* Logging */.y._warn('Invalid dec3 box contents, ignoring.');
                         break;
                     }
                     const sampleRate = (0,codec_data/* getEac3SampleRate */.PK)(config);
@@ -2394,8 +2405,13 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                     // referenced in the track fragment header.
                     if (this.currentTrack) {
                         const trackData = this.currentFragment.trackData.get(this.currentTrack.id);
-                        if (trackData) {
-                            this.currentFragment.implicitBaseDataOffset = trackData.currentOffset;
+                        cond: if (trackData) {
+                            if (trackData.samples.length === 0) {
+                                // Don't associate the fragment with the track if it has no samples, this simplifies
+                                // other code
+                                this.currentFragment.trackData.delete(this.currentTrack.id);
+                                break cond;
+                            }
                             trackData.presentationTimestamps = trackData.samples
                                 .map((x, i) => ({ presentationTimestamp: x.presentationTimestamp, sampleIndex: i }))
                                 .sort((a, b) => a.presentationTimestamp - b.presentationTimestamp);
@@ -2567,11 +2583,6 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                         };
                         this.currentFragment.trackData.set(track.id, trackData);
                     }
-                    if (sampleCount === 0) {
-                        // Don't associate the fragment with the track if it has no samples, this simplifies other code
-                        this.currentFragment.implicitBaseDataOffset = trackData.currentOffset;
-                        break;
-                    }
                     for (let i = 0; i < sampleCount; i++) {
                         let sampleDuration;
                         if (sampleDurationPresent) {
@@ -2621,6 +2632,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                         trackData.currentOffset += sampleSize;
                         trackData.currentTimestamp += sampleDuration;
                     }
+                    this.currentFragment.implicitBaseDataOffset = trackData.currentOffset;
                 }
                 ;
                 break;
@@ -2675,7 +2687,7 @@ class IsobmffDemuxer extends demuxer/* Demuxer */.B {
                         break;
                     }
                     if (entryCount > 1) {
-                        console.warn('Multiple saio entries are not supported; using the first offset only.');
+                        logging/* Logging */.y._warn('Multiple saio entries are not supported; using the first offset only.');
                     }
                     let offset = version === 0 ? (0,src_reader/* readU32Be */.cN)(slice) : Number((0,src_reader/* readU64Be */.th)(slice));
                     // Per ISO/IEC 23001-7: when saio is inside a moof, offsets are relative to the start of the moof box.
@@ -3121,6 +3133,9 @@ class IsobmffTrackBacking {
     isRelativeToUnixEpoch() {
         return false;
     }
+    getUnixTimeForTimestamp() {
+        return null;
+    }
     getDisposition() {
         return this.internalTrack.disposition;
     }
@@ -3495,7 +3510,8 @@ class IsobmffVideoTrackBacking extends IsobmffTrackBacking {
         };
     }
     async canBeTransparent() {
-        return false;
+        return this.internalTrack.info.codec === 'prores' && (this.internalTrack.info.proresFormat === 'ap4h'
+            || this.internalTrack.info.proresFormat === 'ap4x');
     }
     async getDecoderConfig() {
         if (!this.internalTrack.info.codec) {
@@ -3952,6 +3968,7 @@ var matroska_misc = __webpack_require__(3616);
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
+
 
 
 
@@ -4487,6 +4504,7 @@ class MatroskaDemuxer extends demuxer/* Demuxer */.B {
                     data: frameData,
                     lacing: BlockLacing.None,
                     decoded: true,
+                    postProcessed: false,
                     mainAdditional: originalBlock.mainAdditional,
                 });
             }
@@ -4644,7 +4662,7 @@ class MatroskaDemuxer extends demuxer/* Demuxer */.B {
                             || instruction.scope !== ContentEncodingScope.Block
                             || instruction.data.algorithm !== ContentCompAlgo.HeaderStripping;
                     })) {
-                        console.warn(`Track #${this.currentTrack.id} has an unsupported content encoding; dropping.`);
+                        logging/* Logging */.y._warn(`Track #${this.currentTrack.id} has an unsupported content encoding; dropping.`);
                         this.currentTrack = null;
                     }
                     if (this.currentTrack
@@ -4689,6 +4707,19 @@ class MatroskaDemuxer extends demuxer/* Demuxer */.B {
                             }
                             else if (codecIdWithoutSuffix === ebml/* CODEC_STRING_MAP */.oo.av1) {
                                 this.currentTrack.info.codec = 'av1';
+                            }
+                            else if (codecIdWithoutSuffix === ebml/* CODEC_STRING_MAP */.oo.prores) {
+                                const format = this.currentTrack.codecPrivate
+                                    ? misc/* textDecoder */.su.decode(this.currentTrack.codecPrivate)
+                                    : '';
+                                if (codec/* PRORES_FOURCCS */.Y2.includes(format)) {
+                                    this.currentTrack.info.codec = 'prores';
+                                    this.currentTrack.info.proresFormat = format;
+                                }
+                                else {
+                                    // Either an invalid string or ProRes RAW, which we don't support yet (it's a
+                                    // different codec).
+                                }
                             }
                             const videoTrack = this.currentTrack;
                             this.currentTrack.trackBacking = new MatroskaVideoTrackBacking(videoTrack);
@@ -4800,6 +4831,7 @@ class MatroskaDemuxer extends demuxer/* Demuxer */.B {
                             codecDescription: null,
                             colorSpace: null,
                             alphaMode: false,
+                            proresFormat: null,
                         };
                     }
                     else if (type === 2) {
@@ -5186,6 +5218,7 @@ class MatroskaDemuxer extends demuxer/* Demuxer */.B {
                         data: blockData,
                         lacing,
                         decoded: !hasDecodingInstructions,
+                        postProcessed: false,
                         mainAdditional: null,
                     });
                 }
@@ -5222,6 +5255,7 @@ class MatroskaDemuxer extends demuxer/* Demuxer */.B {
                         data: blockData,
                         lacing,
                         decoded: !hasDecodingInstructions,
+                        postProcessed: false,
                         mainAdditional: null,
                     };
                     trackData.blocks.push(this.currentBlock);
@@ -5696,6 +5730,9 @@ class MatroskaTrackBacking {
     isRelativeToUnixEpoch() {
         return false;
     }
+    getUnixTimeForTimestamp() {
+        return null;
+    }
     getDisposition() {
         return this.internalTrack.disposition;
     }
@@ -5850,6 +5887,30 @@ class MatroskaTrackBacking {
         if (!block.decoded) {
             block.data = this.internalTrack.demuxer.decodeBlockData(this.internalTrack, block.data);
             block.decoded = true;
+        }
+        if (!block.postProcessed) {
+            if (this.internalTrack.info?.codec === 'prores') {
+                // For some reason, ProRes packets are stored in Matroska without the frame container atom. FFmpeg cites
+                // the "Matroska spec" but the actual spec says nothing about this.
+                const hasFrameContainer = block.data.length >= 8
+                    && block.data[4] === 105 // 'i'
+                    && block.data[5] === 99 // 'c'
+                    && block.data[6] === 112 // 'p'
+                    && block.data[7] === 102; // 'f'
+                if (!hasFrameContainer) {
+                    // Wrap the frame in a frame container
+                    const newData = new Uint8Array(block.data.length + 8);
+                    const newDataView = (0,misc/* toDataView */.Zc)(newData);
+                    newDataView.setUint32(0, newData.length, false);
+                    newData[4] = 105; // 'i'
+                    newData[5] = 99; // 'c'
+                    newData[6] = 112; // 'p'
+                    newData[7] = 102; // 'f'
+                    newData.set(block.data, 8);
+                    block.data = newData;
+                }
+            }
+            block.postProcessed = true;
         }
         const data = options.metadataOnly ? src_packet/* PLACEHOLDER_DATA */.T : block.data;
         const timestamp = block.timestamp / this.internalTrack.segment.timestampFactor;
@@ -6036,7 +6097,8 @@ class MatroskaVideoTrackBacking extends MatroskaTrackBacking {
         };
     }
     async canBeTransparent() {
-        return this.internalTrack.info.alphaMode;
+        return this.internalTrack.info.alphaMode || (this.internalTrack.info.codec === 'prores' && (this.internalTrack.info.proresFormat === 'ap4h'
+            || this.internalTrack.info.proresFormat === 'ap4x'));
     }
     async getDecoderConfig() {
         if (!this.internalTrack.info.codec) {
@@ -6073,6 +6135,7 @@ class MatroskaVideoTrackBacking extends MatroskaTrackBacking {
                     av1CodecInfo: this.internalTrack.info.codec === 'av1' && firstPacket
                         ? (0,codec_data/* extractAv1CodecInfoFromPacket */.UU)(firstPacket.data)
                         : null,
+                    proresFormat: this.internalTrack.info.proresFormat,
                 }),
                 codedWidth: this.internalTrack.info.width,
                 codedHeight: this.internalTrack.info.height,
@@ -6137,26 +6200,33 @@ var id3 = __webpack_require__(7576);
  */
 
 
-const readNextMp3FrameHeader = async (reader, startPos, until) => {
+const readNextMp3FrameHeader = async (reader, startPos, until, ref = null) => {
     const CHUNK_SIZE = 2 ** 16; // So we don't need to grab thousands of slices
     let currentPos = startPos;
     while (until === null || currentPos < until) {
         const maxLength = until !== null
             ? Math.min(CHUNK_SIZE, until - currentPos)
             : CHUNK_SIZE;
-        let slice = reader.requestSliceRange(currentPos, mp3_misc/* FRAME_HEADER_SIZE */.Yq, maxLength);
+        let slice = reader.requestSliceRange(currentPos, mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_, maxLength);
         if (slice instanceof Promise)
             slice = await slice;
-        if (!slice || slice.length < mp3_misc/* FRAME_HEADER_SIZE */.Yq)
+        if (!slice || slice.length < mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_)
             break;
-        while (slice.remainingLength >= mp3_misc/* FRAME_HEADER_SIZE */.Yq) {
+        while (slice.remainingLength >= mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_) {
             const posBeforeRead = slice.filePos;
             const word = (0,src_reader/* readU32Be */.cN)(slice);
             const remainingBytes = reader.fileSize !== null
                 ? reader.fileSize - currentPos
                 : null;
             const result = (0,mp3_misc/* readMp3FrameHeader */.P8)(word, remainingBytes);
-            if (result.header) {
+            if (result.header
+                && (!ref || (
+                // This condition helps us recover malformed streams
+                // https://stackoverflow.com/a/20884944
+                result.header.sampleRate === ref.sampleRate
+                    && result.header.mpegVersionId === ref.mpegVersionId
+                    && result.header.layer === ref.layer
+                    && (0,mp3_misc/* getMp3ChannelCount */.fX)(result.header.channel) === (0,mp3_misc/* getMp3ChannelCount */.fX)(ref.channel)))) {
                 return { header: result.header, startPos: currentPos };
             }
             slice.filePos = posBeforeRead + result.bytesAdvanced;
@@ -6228,7 +6298,7 @@ class Mp3Demuxer extends demuxer/* Demuxer */.B {
                 this.lastLoadedPos = slice.filePos + id3V2Header.size;
             }
         }
-        const result = await readNextMp3FrameHeader(this.reader, this.lastLoadedPos, this.reader.fileSize);
+        const result = await readNextMp3FrameHeader(this.reader, this.lastLoadedPos, this.reader.fileSize, this.firstFrameHeader);
         if (!result) {
             this.lastSampleLoaded = true;
             return;
@@ -6268,10 +6338,6 @@ class Mp3Demuxer extends demuxer/* Demuxer */.B {
         if (!this.firstFrameHeader) {
             this.firstFrameHeader = header;
             this.firstFrameHeaderPos = result.startPos;
-        }
-        if (header.sampleRate !== this.firstFrameHeader.sampleRate) {
-            console.warn(`MP3 changed sample rate mid-file: ${this.firstFrameHeader.sampleRate} Hz to ${header.sampleRate} Hz.`
-                + ` Might be a bug, so please report this file.`);
         }
         const sampleDuration = header.audioSamplesInFrame / this.firstFrameHeader.sampleRate;
         const sample = {
@@ -6358,6 +6424,9 @@ class Mp3AudioTrackBacking {
     isRelativeToUnixEpoch() {
         return false;
     }
+    getUnixTimeForTimestamp() {
+        return null;
+    }
     getPairingMask() {
         return 1n;
     }
@@ -6407,7 +6476,7 @@ class Mp3AudioTrackBacking {
     }
     getNumberOfChannels() {
         (0,misc/* assert */.vA)(this.demuxer.firstFrameHeader);
-        return this.demuxer.firstFrameHeader.channel === 3 ? 1 : 2;
+        return (0,mp3_misc/* getMp3ChannelCount */.fX)(this.demuxer.firstFrameHeader.channel);
     }
     getSampleRate() {
         (0,misc/* assert */.vA)(this.demuxer.firstFrameHeader);
@@ -6422,7 +6491,7 @@ class Mp3AudioTrackBacking {
         (0,misc/* assert */.vA)(this.demuxer.firstFrameHeader);
         return {
             codec: 'mp3',
-            numberOfChannels: this.demuxer.firstFrameHeader.channel === 3 ? 1 : 2,
+            numberOfChannels: (0,mp3_misc/* getMp3ChannelCount */.fX)(this.demuxer.firstFrameHeader.channel),
             sampleRate: this.demuxer.firstFrameHeader.sampleRate,
         };
     }
@@ -6836,6 +6905,9 @@ class OggAudioTrackBacking {
     isRelativeToUnixEpoch() {
         return false;
     }
+    getUnixTimeForTimestamp() {
+        return null;
+    }
     getPairingMask() {
         return 1n;
     }
@@ -6955,10 +7027,10 @@ class OggAudioTrackBacking {
         let lowPage = startPosition.startPage;
         let high = this.demuxer.reader.fileSize;
         const lowPages = [lowPage];
-        // First, let's perform a binary serach (bisection search) on the file to find the approximate page where
+        // First, let's perform a binary search (bisection search) on the file to find the approximate page where
         // we'll find the packet. We want to find a page whose end packet position is less than or equal to the
         // packet position we're searching for.
-        // Outer loop: Does the binary serach
+        // Outer loop: Does the binary search
         outer: while (lowPage.headerStartPos + lowPage.totalSize < high) {
             const low = lowPage.headerStartPos;
             const mid = Math.floor((low + high) / 2);
@@ -7450,6 +7522,9 @@ class AdtsAudioTrackBacking {
     isRelativeToUnixEpoch() {
         return false;
     }
+    getUnixTimeForTimestamp() {
+        return null;
+    }
     getPairingMask() {
         return 1n;
     }
@@ -7599,6 +7674,7 @@ var flac_misc = __webpack_require__(5828);
 
 
 
+
 class FlacDemuxer extends demuxer/* Demuxer */.B {
     constructor(input) {
         super(input);
@@ -7626,8 +7702,29 @@ class FlacDemuxer extends demuxer/* Demuxer */.B {
         return 'audio/flac';
     }
     async readMetadata() {
-        let currentPos = 4; // Skip 'fLaC'
         return (this.metadataPromise ??= (async () => {
+            // Read all ID3v2 tags at the start of the file
+            let currentPos = 0;
+            while (true) {
+                let headerSlice = this.reader.requestSlice(currentPos, id3/* ID3_V2_HEADER_SIZE */.sY);
+                if (headerSlice instanceof Promise)
+                    headerSlice = await headerSlice;
+                if (!headerSlice) {
+                    this.lastSampleLoaded = true;
+                    return;
+                }
+                const id3V2Header = (0,id3/* readId3V2Header */.IX)(headerSlice);
+                if (!id3V2Header) {
+                    break;
+                }
+                let contentSlice = this.reader.requestSlice(headerSlice.filePos, id3V2Header.size);
+                if (contentSlice instanceof Promise)
+                    contentSlice = await contentSlice;
+                (0,misc/* assert */.vA)(contentSlice);
+                (0,id3/* parseId3V2Tag */.cG)(contentSlice, id3V2Header, this.metadataTags);
+                currentPos = headerSlice.filePos + id3V2Header.size;
+            }
+            currentPos += 4; // Skip 'fLaC'
             while (this.reader.fileSize === null
                 || currentPos < this.reader.fileSize) {
                 let sizeSlice = this.reader.requestSlice(currentPos, 4);
@@ -7667,7 +7764,7 @@ class FlacDemuxer extends demuxer/* Demuxer */.B {
                         // description is required, and has to be the following:
                         // 1. The bytes 0x66 0x4C 0x61 0x43 ("fLaC" in ASCII)
                         // 2. A metadata block (called the STREAMINFO block) as described in section 7 of [FLAC]
-                        // 3. Optionaly (sic) other metadata blocks, that are not used by the specification
+                        // 3. Optionally (sic) other metadata blocks, that are not used by the specification
                         bitstream.skipBits(16 * 8); // md5 hash
                         const description = new Uint8Array(42);
                         // 1. "fLaC"
@@ -7746,7 +7843,7 @@ class FlacDemuxer extends demuxer/* Demuxer */.B {
         (0,misc/* assert */.vA)(this.audioInfo);
         // we expect that there are at least `minimumFrameSize` bytes left in the file
         // Ideally we also want to validate the next header is valid
-        // to throw out an accidential sync word
+        // to throw out an accidental sync word
         // The shortest valid FLAC header I can think of, based off the code
         // of readFlacFrameHeader:
         // 4 bytes used for bitstream from syncword to bit depth
@@ -8008,6 +8105,9 @@ class FlacAudioTrackBacking {
     isRelativeToUnixEpoch() {
         return false;
     }
+    getUnixTimeForTimestamp() {
+        return null;
+    }
     getPairingMask() {
         return 1n;
     }
@@ -8153,6 +8253,7 @@ var mpeg_ts_misc = __webpack_require__(2490);
 
 
 
+
 // Resources:
 // ISO/IEC 13818-1
 const MISSING_PTS_ERROR_MESSAGE = 'PES packet is missing PTS where it was expected. PES packets without PTS are not'
@@ -8212,6 +8313,11 @@ class MpegTsDemuxer extends demuxer/* Demuxer */.B {
                 }
                 if (packetHeader.payloadUnitStartIndicator === 0) {
                     // Not the start of a section
+                    currentPos += this.packetStride;
+                    continue;
+                }
+                if (hasProgramMap && !this.elementaryStreams.some(x => x.pid === packetHeader.pid)) {
+                    // Don't care about this PID
                     currentPos += this.packetStride;
                     continue;
                 }
@@ -8385,7 +8491,7 @@ class MpegTsDemuxer extends demuxer/* Demuxer */.B {
                                 // If we don't recognize the codec, we don't surface the track at all. This is because
                                 // we can't determine its metadata and also have no idea how to packetize its data.
                                 if (!ignoredStreamTypes.has(streamType)) {
-                                    console.warn(`Note: MPEG-TS streams with stream_type 0x${streamType.toString(16)} are not`
+                                    logging/* Logging */.y._warn(`Note: MPEG-TS streams with stream_type 0x${streamType.toString(16)} are not`
                                         + ` currently supported.`);
                                     ignoredStreamTypes.add(streamType);
                                 }
@@ -8518,6 +8624,7 @@ class MpegTsDemuxer extends demuxer/* Demuxer */.B {
                                     hevcCodecInfo: elementaryStream.info.hevcCodecInfo,
                                     vp9CodecInfo: null,
                                     av1CodecInfo: null,
+                                    proresFormat: null,
                                 }),
                                 codedWidth: elementaryStream.info.width,
                                 codedHeight: elementaryStream.info.height,
@@ -8559,7 +8666,7 @@ class MpegTsDemuxer extends demuxer/* Demuxer */.B {
                                 if (!result.header) {
                                     throw new Error('Invalid MP3 audio stream; could not read frame header from first packet.');
                                 }
-                                elementaryStream.info.numberOfChannels = result.header.channel === 3 ? 1 : 2;
+                                elementaryStream.info.numberOfChannels = (0,mp3_misc/* getMp3ChannelCount */.fX)(result.header.channel);
                                 elementaryStream.info.sampleRate = result.header.sampleRate;
                             }
                             else if (elementaryStream.info.codec === 'ac3') {
@@ -8917,6 +9024,9 @@ class MpegTsTrackBacking {
     }
     isRelativeToUnixEpoch() {
         return false;
+    }
+    getUnixTimeForTimestamp() {
+        return null;
     }
     getPairingMask() {
         return 1n;
@@ -9552,12 +9662,17 @@ class PacketReadingContext {
         (0,misc/* assert */.vA)(!this.suppliedPacket);
         const elementaryStream = this.elementaryStream;
         if (elementaryStream.info.type === 'video') {
+            // Our job here is to separate the video stream into access units. Sometimes this is easy (like when AUDs
+            // are present), sometimes it's a little harder.
             const codec = elementaryStream.info.codec;
             const CHUNK_SIZE = 1024;
             if (codec !== 'avc' && codec !== 'hevc') {
                 throw new Error('Unhandled.');
             }
+            const nalHeaderSize = codec === 'avc' ? 1 : 2;
             let packetStartPos = null;
+            let frameStartFound = false;
+            let lastFirstMacroblockInSlice = 0;
             while (true) {
                 let remaining = this.ensureBuffered(CHUNK_SIZE);
                 if (remaining instanceof Promise)
@@ -9575,10 +9690,9 @@ class PacketReadingContext {
                         break;
                     }
                     i = zeroIndex;
-                    // Check if we have enough bytes to identify a start code
                     const posBeforeZero = chunkStartPos + i;
-                    // Need at least 4 more bytes after the 0x00 to check for start code + NAL type
-                    if (i + 4 >= length) {
+                    // Need 3 more bytes after the 0x00 to recognize a start code prefix
+                    if (i + 3 >= length) {
                         // Not enough data in current chunk, seek back and let the next iteration handle it
                         this.seekTo(posBeforeZero);
                         break;
@@ -9587,16 +9701,13 @@ class PacketReadingContext {
                     const b2 = chunk[i + 2];
                     const b3 = chunk[i + 3];
                     let startCodeLength = 0;
-                    let nalUnitTypeByte = null;
                     // Check for 4-byte start code (0x00000001)
                     if (b1 === 0x00 && b2 === 0x00 && b3 === 0x01) {
                         startCodeLength = 4;
-                        nalUnitTypeByte = chunk[i + 4];
                     }
                     else if (b1 === 0x00 && b2 === 0x01) {
                         // 3-byte start code (0x000001)
                         startCodeLength = 3;
-                        nalUnitTypeByte = b3;
                     }
                     if (startCodeLength === 0) {
                         // Not a start code, continue
@@ -9604,28 +9715,81 @@ class PacketReadingContext {
                         continue;
                     }
                     const startCodePos = posBeforeZero;
-                    if (packetStartPos === null) {
-                        // This is our first start code, mark packet start
-                        packetStartPos = startCodePos;
-                        i += startCodeLength;
-                        continue;
+                    // The packet only really begins at the first NAL unit; anything before it isn't usable
+                    packetStartPos ??= startCodePos;
+                    const nalHeaderStart = i + startCodeLength;
+                    const payloadStart = nalHeaderStart + nalHeaderSize;
+                    // Bytes peeked from the start of a slice header to decode first_mb_in_slice. Six bytes (48 bits)
+                    // comfortably covers the exp-Golomb code for any realistic macroblock count
+                    const AVC_SLICE_HEADER_PEEK_SIZE = 6;
+                    // We read the NAL header plus, for slices, the start of the slice header to decode the
+                    // first_mb_in_slice / first_slice_segment_in_pic_flag. Make sure all of it is buffered.
+                    const bytesNeeded = payloadStart + (codec === 'avc' ? AVC_SLICE_HEADER_PEEK_SIZE : 1);
+                    if (bytesNeeded > length) {
+                        this.seekTo(posBeforeZero);
+                        break;
                     }
-                    // We have a second start code. Check if it's an AUD.
-                    if (nalUnitTypeByte !== null) {
-                        const nalUnitType = codec === 'avc'
-                            ? (0,codec_data/* extractNalUnitTypeForAvc */.uN)(nalUnitTypeByte)
-                            : (0,codec_data/* extractNalUnitTypeForHevc */.O9)(nalUnitTypeByte);
-                        const isAud = codec === 'avc'
-                            ? nalUnitType === codec_data/* AvcNalUnitType */.mY.AUD
-                            : nalUnitType === codec_data/* HevcNalUnitType */.iJ.AUD_NUT;
-                        if (isAud) {
-                            // End the packet at this start code (before the AUD)
-                            const packetLength = startCodePos - packetStartPos;
-                            this.seekTo(packetStartPos);
-                            return this.supplyPacket(packetLength, 0);
+                    const headerByte0 = chunk[nalHeaderStart];
+                    let nalUnitType;
+                    let isSlice;
+                    let isAccessUnitStart;
+                    if (codec === 'avc') {
+                        nalUnitType = (0,codec_data/* extractNalUnitTypeForAvc */.uN)(headerByte0);
+                        isSlice = nalUnitType === codec_data/* AvcNalUnitType */.mY.NON_IDR_SLICE
+                            || nalUnitType === codec_data/* AvcNalUnitType */.mY.SLICE_DPA
+                            || nalUnitType === codec_data/* AvcNalUnitType */.mY.IDR;
+                        isAccessUnitStart = nalUnitType === codec_data/* AvcNalUnitType */.mY.SEI
+                            || nalUnitType === codec_data/* AvcNalUnitType */.mY.SPS
+                            || nalUnitType === codec_data/* AvcNalUnitType */.mY.PPS
+                            || nalUnitType === codec_data/* AvcNalUnitType */.mY.AUD;
+                    }
+                    else {
+                        nalUnitType = (0,codec_data/* extractNalUnitTypeForHevc */.O9)(headerByte0);
+                        const layerId = ((headerByte0 & 1) << 5) | (chunk[nalHeaderStart + 1] >> 3);
+                        if (layerId > 0) {
+                            // Higher layers don't delimit the base-layer frames we care about
+                            i += startCodeLength;
+                            continue;
+                        }
+                        // VCL slices: 0..RASL_R, plus the IRAP range BLA_W_LP..CRA_NUT
+                        isSlice = nalUnitType <= codec_data/* HevcNalUnitType */.iJ.RASL_R
+                            || (nalUnitType >= codec_data/* HevcNalUnitType */.iJ.BLA_W_LP && nalUnitType <= 21);
+                        // VPS..FD, prefix SEI, and the reserved/unspecified non-VCL ranges
+                        isAccessUnitStart = (nalUnitType >= codec_data/* HevcNalUnitType */.iJ.VPS_NUT && nalUnitType <= 37)
+                            || nalUnitType === codec_data/* HevcNalUnitType */.iJ.PREFIX_SEI_NUT
+                            || (nalUnitType >= 41 && nalUnitType <= 44)
+                            || (nalUnitType >= 48 && nalUnitType <= 55);
+                    }
+                    let isFrameBoundary = false;
+                    if (isSlice) {
+                        let startsNewPicture;
+                        if (codec === 'avc') {
+                            const headerBytes = chunk.subarray(payloadStart, payloadStart + AVC_SLICE_HEADER_PEEK_SIZE);
+                            const firstMacroblockInSlice = (0,misc/* readExpGolomb */.IP)(new shared_bitstream/* Bitstream */._(headerBytes));
+                            startsNewPicture = !frameStartFound || firstMacroblockInSlice <= lastFirstMacroblockInSlice;
+                            lastFirstMacroblockInSlice = firstMacroblockInSlice;
+                        }
+                        else {
+                            startsNewPicture = (chunk[payloadStart] >> 7) === 1;
+                        }
+                        if (startsNewPicture) {
+                            if (frameStartFound) {
+                                isFrameBoundary = true;
+                            }
+                            else {
+                                frameStartFound = true;
+                            }
                         }
                     }
-                    // Not an AUD, continue searching
+                    else if (isAccessUnitStart && frameStartFound) {
+                        isFrameBoundary = true;
+                    }
+                    if (isFrameBoundary) {
+                        // End the packet at this start code (the next frame begins here)
+                        const packetLength = startCodePos - packetStartPos;
+                        this.seekTo(packetStartPos);
+                        return this.supplyPacket(packetLength, 0);
+                    }
                     i += startCodeLength;
                 }
                 if (remaining < CHUNK_SIZE) {
@@ -9633,8 +9797,8 @@ class PacketReadingContext {
                     break;
                 }
             }
-            // End of stream - return remaining data if we have a packet start
-            if (packetStartPos !== null) {
+            // End of stream - emit whatever's left as the final packet
+            if (packetStartPos !== null && this.endPos > packetStartPos) {
                 const packetLength = this.endPos - packetStartPos;
                 this.seekTo(packetStartPos);
                 return this.supplyPacket(packetLength, 0);
@@ -9681,13 +9845,13 @@ class PacketReadingContext {
                         }
                         this.skip(-1);
                         const possibleHeaderStartPos = this.currentPos;
-                        let remaining = this.ensureBuffered(mp3_misc/* FRAME_HEADER_SIZE */.Yq);
+                        let remaining = this.ensureBuffered(mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_);
                         if (remaining instanceof Promise)
                             remaining = await remaining;
-                        if (remaining < mp3_misc/* FRAME_HEADER_SIZE */.Yq) {
+                        if (remaining < mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_) {
                             return;
                         }
-                        const headerBytes = this.readBytes(mp3_misc/* FRAME_HEADER_SIZE */.Yq);
+                        const headerBytes = this.readBytes(mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_);
                         const word = (0,misc/* toDataView */.Zc)(headerBytes).getUint32(0);
                         const result = (0,mp3_misc/* readMp3FrameHeader */.P8)(word, null);
                         if (result.header) {
@@ -9972,6 +10136,15 @@ class SegmentedInput {
         }
         return lastSegment.timestamp + lastSegment.duration;
     }
+    async getUnixTimeForTimestamp(timestamp) {
+        let segment = await this.getSegmentAt(timestamp, {});
+        segment ??= await this.getFirstSegment({});
+        if (!segment || segment.unixEpochTimestamp === null) {
+            return null;
+        }
+        const elapsed = timestamp - segment.timestamp;
+        return segment.unixEpochTimestamp + elapsed;
+    }
     async getTrackBackings() {
         return this.trackBackingsPromise ??= (async () => {
             const backings = [];
@@ -10133,7 +10306,10 @@ class SegmentedInputInputTrackBacking {
     async isRelativeToUnixEpoch() {
         await this.hydrate();
         (0,misc/* assert */.vA)(this.segmentedInput.firstSegment);
-        return this.segmentedInput.firstSegment.relativeToUnixEpoch;
+        return this.segmentedInput.firstSegment.unixEpochTimestamp === this.segmentedInput.firstSegment.timestamp;
+    }
+    getUnixTimeForTimestamp(timestamp) {
+        return this.segmentedInput.getUnixTimeForTimestamp(timestamp);
     }
     getBitrate() {
         return this.delegate(() => this.firstInputTrack._backing.getBitrate());
@@ -10389,6 +10565,7 @@ class HlsSegmentedInput extends SegmentedInput {
         this.streamHasEnded = false;
         this.lastSegmentUpdateTime = -Infinity;
         this.refreshInterval = 5; // Reasonable default in case the playlist doesn't specify it
+        this.rootPath = path;
         this.demuxer = demuxer;
         this.nextLines = lines;
     }
@@ -10427,11 +10604,15 @@ class HlsSegmentedInput extends SegmentedInput {
         if (!lines) {
             const env_1 = { stack: [], error: void 0, hasError: false };
             try {
-                const ref = __addDisposableResource(env_1, await this.demuxer.input._getSourceUncached({ path: this.path, isRoot: false }), false);
+                const ref = __addDisposableResource(env_1, await this.demuxer.input._getSourceUncached({ path: this.rootPath, isRoot: false }), false);
                 const reader = new src_reader/* Reader */.mP(ref.source);
                 const slice = await reader.requestEntireFile();
                 (0,misc/* assert */.vA)(slice);
                 lines = (0,src_reader/* readAllLines */.jo)(slice, slice.length, { ignore: hls_misc/* canIgnoreLine */.nf });
+                if (ref.source instanceof source/* PathedSource */.QI) {
+                    // Copy back the source's path to become aware of potential redirects
+                    this.rootPath = ref.source.rootPath;
+                }
             }
             catch (e_1) {
                 env_1.error = e_1;
@@ -10441,8 +10622,10 @@ class HlsSegmentedInput extends SegmentedInput {
                 __disposeResources(env_1);
             }
         }
+        const offsetTimestampsByDateTime = this.input._formatOptions.hls?.offsetTimestampsByDateTime !== false;
         let headerRead = false;
         let accumulatedTime = 0;
+        let accumulatedUnixTime = null;
         let nextSegmentDuration = null;
         let currentKey = null;
         let nextSequenceNumber = 0;
@@ -10481,6 +10664,9 @@ class HlsSegmentedInput extends SegmentedInput {
                     currentFirstSegment = prevLastSegment.firstSegment;
                     currentInitSegment = prevLastSegment.initSegment;
                     lastProgramDateTimeSeconds = prevLastSegment.lastProgramDateTimeSeconds;
+                    accumulatedUnixTime = prevLastSegment.unixEpochTimestamp !== null
+                        ? prevLastSegment.unixEpochTimestamp + prevLastSegment.duration
+                        : null;
                     prevLastSegment = null;
                 }
             }
@@ -10510,7 +10696,7 @@ class HlsSegmentedInput extends SegmentedInput {
                         view.setUint32(12, nextSequenceNumber);
                         key = { ...key, iv };
                     }
-                    const fullPath = (0,misc/* joinPaths */.HS)(this.path, line);
+                    const fullPath = (0,misc/* joinPaths */.HS)(this.rootPath, line);
                     const location = {
                         path: fullPath,
                         offset: nextByteRange?.offset ?? 0,
@@ -10518,7 +10704,7 @@ class HlsSegmentedInput extends SegmentedInput {
                     };
                     const segment = {
                         timestamp: accumulatedTime,
-                        relativeToUnixEpoch: lastProgramDateTimeSeconds !== null,
+                        unixEpochTimestamp: accumulatedUnixTime,
                         firstSegment: currentFirstSegment,
                         sequenceNumber: nextSequenceNumber,
                         location,
@@ -10529,6 +10715,9 @@ class HlsSegmentedInput extends SegmentedInput {
                     };
                     currentFirstSegment ??= segment;
                     accumulatedTime += nextSegmentDuration;
+                    if (accumulatedUnixTime !== null) {
+                        accumulatedUnixTime += nextSegmentDuration;
+                    }
                     this.segments.push(segment);
                 }
                 else {
@@ -10579,7 +10768,7 @@ class HlsSegmentedInput extends SegmentedInput {
                     throw new Error('Invalid #EXT-X-MAP tag; BYTERANGE attribute must have a specified offset.');
                 }
                 if (!prevLastSegment) {
-                    const fullPath = (0,misc/* joinPaths */.HS)(this.path, uri);
+                    const fullPath = (0,misc/* joinPaths */.HS)(this.rootPath, uri);
                     const location = {
                         path: fullPath,
                         offset: parsedByteRange?.offset ?? 0,
@@ -10591,7 +10780,7 @@ class HlsSegmentedInput extends SegmentedInput {
                     }
                     const segment = {
                         timestamp: accumulatedTime,
-                        relativeToUnixEpoch: lastProgramDateTimeSeconds !== null,
+                        unixEpochTimestamp: accumulatedUnixTime,
                         firstSegment: null,
                         sequenceNumber: null,
                         location,
@@ -10646,7 +10835,7 @@ class HlsSegmentedInput extends SegmentedInput {
                     }
                     currentKey = {
                         method: 'AES-128',
-                        keyUri: (0,misc/* joinPaths */.HS)(this.path, uri),
+                        keyUri: (0,misc/* joinPaths */.HS)(this.rootPath, uri),
                         iv,
                         keyFormat,
                     };
@@ -10727,13 +10916,17 @@ class HlsSegmentedInput extends SegmentedInput {
                     const lastSegmentEnd = lastSegment.timestamp + lastSegment.duration;
                     const offset = dateTimeSeconds - lastSegmentEnd;
                     for (const segment of this.segments) {
-                        segment.timestamp += offset;
-                        segment.relativeToUnixEpoch = true;
+                        segment.unixEpochTimestamp = segment.timestamp + offset;
+                        if (offsetTimestampsByDateTime) {
+                            segment.timestamp = segment.unixEpochTimestamp;
+                        }
                     }
-                    accumulatedTime += offset;
                 }
                 lastProgramDateTimeSeconds = dateTimeSeconds;
-                accumulatedTime = dateTimeSeconds; // Snap the accumulated time to the datetime
+                accumulatedUnixTime = dateTimeSeconds;
+                if (offsetTimestampsByDateTime) {
+                    accumulatedTime = dateTimeSeconds; // Snap the accumulated time into Unix space
+                }
             }
             else if (line === hls_misc/* TAG_DISCONTINUITY */.i$) {
                 currentFirstSegment = null;
@@ -10979,10 +11172,12 @@ class HlsDemuxer extends demuxer/* Demuxer */.B {
     readMetadata() {
         return this.metadataPromise ??= (async () => {
             (0,misc/* assert */.vA)(this.input._rootSource instanceof source/* PathedSource */.QI);
-            const { rootPath } = this.input._rootSource;
             const slice = await this.input._reader.requestEntireFile();
             (0,misc/* assert */.vA)(slice);
             const lines = (0,src_reader/* readAllLines */.jo)(slice, slice.length, { ignore: hls_misc/* canIgnoreLine */.nf });
+            // Important: get the root path AFTER reading data to get the final root path, possibly affected by
+            // redirects. Any follow requests should be related to the redirected path, not the original one.
+            const { rootPath } = this.input._rootSource;
             const variantStreams = [];
             const mediaTags = [];
             // Let's first iterate through the entire file, collecting all variant streams and media tags
@@ -11504,6 +11699,9 @@ class HlsInputTrackBacking {
     isRelativeToUnixEpoch() {
         return this.delegate(() => this.internalTrack.backingTrack.isRelativeToUnixEpoch());
     }
+    getUnixTimeForTimestamp(timestamp) {
+        return this.delegate(() => this.internalTrack.backingTrack.getUnixTimeForTimestamp(timestamp));
+    }
     getBitrate() {
         return this.internalTrack.peakBitrate;
     }
@@ -11972,7 +12170,7 @@ class Mp3InputFormat extends InputFormat {
         currentPos = firstResult.startPos + firstResult.header.totalSize;
         // Fine, we found one frame header, but we're still not entirely sure this is MP3. Let's check if we can find
         // another header right after it:
-        const secondResult = await readNextMp3FrameHeader(input._reader, currentPos, currentPos + mp3_misc/* FRAME_HEADER_SIZE */.Yq);
+        const secondResult = await readNextMp3FrameHeader(input._reader, currentPos, currentPos + mp3_misc/* MP3_FRAME_HEADER_SIZE */.D_);
         if (!secondResult) {
             return false;
         }
@@ -12070,7 +12268,21 @@ class OggInputFormat extends InputFormat {
 class FlacInputFormat extends InputFormat {
     /** @internal */
     async _canReadInput(input) {
-        let slice = input._reader.requestSlice(0, 4);
+        let currentPos = 0;
+        // There might be ID3v2 headers at the start, skip 'em
+        while (true) {
+            let slice = input._reader.requestSlice(currentPos, id3/* ID3_V2_HEADER_SIZE */.sY);
+            if (slice instanceof Promise)
+                slice = await slice;
+            if (!slice)
+                break;
+            const id3V2Header = (0,id3/* readId3V2Header */.IX)(slice);
+            if (!id3V2Header) {
+                break;
+            }
+            currentPos = slice.filePos + id3V2Header.size;
+        }
+        let slice = input._reader.requestSlice(currentPos, 4);
         if (slice instanceof Promise)
             slice = await slice;
         if (!slice)
@@ -12322,6 +12534,15 @@ const validateInputFormatOptions = (options, prefix) => {
             throw new TypeError(`${prefix}.isobmff.resolveKeyId, when provided, must be a function.`);
         }
     }
+    if (options.hls !== undefined) {
+        if (!options.hls || typeof options.hls !== 'object') {
+            throw new TypeError(`${prefix}.hls, when provided, must be an object.`);
+        }
+        if (options.hls.offsetTimestampsByDateTime !== undefined
+            && typeof options.hls.offsetTimestampsByDateTime !== 'boolean') {
+            throw new TypeError(`${prefix}.hls.offsetTimestampsByDateTime, when provided, must be a boolean.`);
+        }
+    }
 };
 
 
@@ -12343,9 +12564,10 @@ const validateInputFormatOptions = (options, prefix) => {
 /* unused harmony export asc */
 /* harmony import */ var _codec_data_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6297);
 /* harmony import */ var _custom_coder_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8647);
-/* harmony import */ var _media_sink_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(388);
-/* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3912);
-/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3936);
+/* harmony import */ var _logging_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(6103);
+/* harmony import */ var _media_sink_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(388);
+/* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3912);
+/* harmony import */ var _packet_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(3936);
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
  *
@@ -12353,6 +12575,7 @@ const validateInputFormatOptions = (options, prefix) => {
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
+
 
 
 
@@ -12459,6 +12682,26 @@ class InputTrack {
     async isRelativeToUnixEpoch() {
         return this._backing.isRelativeToUnixEpoch();
     }
+    /**
+     * Returns the Unix time (in seconds since January 1, 1970 00:00:00 UTC) that the given track timestamp (in seconds)
+     * maps to, or `null` if there is no such mapping. This provides a piecewise-continuous mapping from this track's
+     * timestamp space into wall-clock time. Such mapping exists, for example, for HLS playlists with
+     * `#EXT-X-PROGRAM-DATE-TIME` tags present.
+     *
+     * This mapping can be available even when {@link InputTrack.isRelativeToUnixEpoch} is `false`, for example for HLS
+     * streams with program date time information but with {@link HlsInputFormatOptions.offsetTimestampsByDateTime}
+     * set to `false`.
+     */
+    async getUnixTimeForTimestamp(timestamp) {
+        return this._backing.getUnixTimeForTimestamp(timestamp);
+    }
+    /**
+     * Whether the track's timestamps can be mapped to Unix wall clock time via
+     * {@link InputTrack.getUnixTimeForTimestamp}.
+     */
+    async hasUnixTimeMapping() {
+        return (await this._backing.getUnixTimeForTimestamp(await this.getFirstTimestamp())) !== null;
+    }
     /** Returns the track's disposition, i.e. information about its intended usage. */
     async getDisposition() {
         return this._backing.getDisposition();
@@ -12503,7 +12746,7 @@ class InputTrack {
     async computeDuration(options) {
         const lastPacket = await this._backing.getPacket(Infinity, { metadataOnly: true, ...options });
         const result = (lastPacket?.timestamp ?? 0) + (lastPacket?.duration ?? 0);
-        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_3__/* .roundToDivisor */ .gl)(result, await this.getTimeResolution());
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_4__/* .roundToDivisor */ .gl)(result, await this.getTimeResolution());
     }
     /**
      * Gets the duration (end timestamp) in seconds of this track from metadata stored in the file. This value may be
@@ -12531,7 +12774,7 @@ class InputTrack {
      * {@link PacketRetrievalOptions.skipLiveWait} to `true` in the options.
      */
     async computePacketStats(targetPacketCount = Infinity, options) {
-        const sink = new _media_sink_js__WEBPACK_IMPORTED_MODULE_2__/* .EncodedPacketSink */ .kQ(this);
+        const sink = new _media_sink_js__WEBPACK_IMPORTED_MODULE_3__/* .EncodedPacketSink */ .kQ(this);
         let startTimestamp = Infinity;
         let endTimestamp = -Infinity;
         let packetCount = 0;
@@ -12708,7 +12951,8 @@ class InputVideoTrack extends InputTrack {
         return requireSync(this._backing.getCodec(), 'codec', 'getCodec');
     }
     async hasOnlyKeyPackets() {
-        return (await this._backing.getHasOnlyKeyPackets?.()) ?? false;
+        return (await this._backing.getHasOnlyKeyPackets?.())
+            ?? (await this._backing.getCodec() === 'prores'); // Only ProRes is fully intra-frame
     }
     /** Returns the width in pixels of the track's coded samples, before any transformations or rotations. */
     async getCodedWidth() {
@@ -12776,7 +13020,7 @@ class InputVideoTrack extends InputTrack {
     async getPixelAspectRatio() {
         // Potential minor async race condition here if called twice, but doesn't matter since the computation is
         // so cheap
-        return this._pixelAspectRatioCache ??= (0,_misc_js__WEBPACK_IMPORTED_MODULE_3__/* .simplifyRational */ .Yf)({
+        return this._pixelAspectRatioCache ??= (0,_misc_js__WEBPACK_IMPORTED_MODULE_4__/* .simplifyRational */ .Yf)({
             num: (await this.getSquarePixelWidth()) * (await this.getCodedHeight()),
             den: (await this.getSquarePixelHeight()) * (await this.getCodedWidth()),
         });
@@ -12787,7 +13031,7 @@ class InputVideoTrack extends InputTrack {
      * @deprecated Use {@link InputVideoTrack.getPixelAspectRatio} instead.
      */
     get pixelAspectRatio() {
-        return this._pixelAspectRatioCache ??= (0,_misc_js__WEBPACK_IMPORTED_MODULE_3__/* .simplifyRational */ .Yf)({
+        return this._pixelAspectRatioCache ??= (0,_misc_js__WEBPACK_IMPORTED_MODULE_4__/* .simplifyRational */ .Yf)({
             num: requireSync(this._backing.getSquarePixelWidth(), 'pixelAspectRatio', 'getPixelAspectRatio')
                 * requireSync(this._backing.getCodedHeight(), 'pixelAspectRatio', 'getPixelAspectRatio'),
             den: requireSync(this._backing.getSquarePixelHeight(), 'pixelAspectRatio', 'getPixelAspectRatio')
@@ -12856,7 +13100,7 @@ class InputVideoTrack extends InputTrack {
     async hasHighDynamicRange() {
         const colorSpace = await this._backing.getColorSpace();
         return colorSpace.primaries === 'bt2020' || colorSpace.primaries === 'smpte432'
-            || colorSpace.transfer === 'pg' || colorSpace.transfer === 'hlg'
+            || colorSpace.transfer === 'pq' || colorSpace.transfer === 'hlg'
             || colorSpace.matrix === 'bt2020-ncl';
     }
     /** Checks if this track may contain transparent samples with alpha data. */
@@ -12886,7 +13130,7 @@ class InputVideoTrack extends InputTrack {
                 return false;
             }
             const codec = await this._backing.getCodec();
-            (0,_misc_js__WEBPACK_IMPORTED_MODULE_3__/* .assert */ .vA)(codec !== null);
+            (0,_misc_js__WEBPACK_IMPORTED_MODULE_4__/* .assert */ .vA)(codec !== null);
             if (_custom_coder_js__WEBPACK_IMPORTED_MODULE_1__/* .customVideoDecoders */ .wb.some(x => x.supports(codec, decoderConfig))) {
                 return true;
             }
@@ -12897,12 +13141,12 @@ class InputVideoTrack extends InputTrack {
             return support.supported === true;
         }
         catch (error) {
-            console.error('Error during decodability check:', error);
+            _logging_js__WEBPACK_IMPORTED_MODULE_2__/* .Logging */ .y._error('Error during decodability check:', error);
             return false;
         }
     }
     async determinePacketType(packet) {
-        if (!(packet instanceof _packet_js__WEBPACK_IMPORTED_MODULE_4__/* .EncodedPacket */ .Z)) {
+        if (!(packet instanceof _packet_js__WEBPACK_IMPORTED_MODULE_5__/* .EncodedPacket */ .Z)) {
             throw new TypeError('packet must be an EncodedPacket.');
         }
         if (packet.isMetadataOnly) {
@@ -12913,7 +13157,7 @@ class InputVideoTrack extends InputTrack {
             return null;
         }
         const decoderConfig = await this.getDecoderConfig();
-        (0,_misc_js__WEBPACK_IMPORTED_MODULE_3__/* .assert */ .vA)(decoderConfig);
+        (0,_misc_js__WEBPACK_IMPORTED_MODULE_4__/* .assert */ .vA)(decoderConfig);
         return (0,_codec_data_js__WEBPACK_IMPORTED_MODULE_0__/* .determineVideoPacketType */ .PR)(codec, decoderConfig, packet.data);
     }
 }
@@ -12990,7 +13234,7 @@ class InputAudioTrack extends InputTrack {
                 return false;
             }
             const codec = await this._backing.getCodec();
-            (0,_misc_js__WEBPACK_IMPORTED_MODULE_3__/* .assert */ .vA)(codec !== null);
+            (0,_misc_js__WEBPACK_IMPORTED_MODULE_4__/* .assert */ .vA)(codec !== null);
             if (_custom_coder_js__WEBPACK_IMPORTED_MODULE_1__/* .customAudioDecoders */ .zx.some(x => x.supports(codec, decoderConfig))) {
                 return true;
             }
@@ -13006,12 +13250,12 @@ class InputAudioTrack extends InputTrack {
             }
         }
         catch (error) {
-            console.error('Error during decodability check:', error);
+            _logging_js__WEBPACK_IMPORTED_MODULE_2__/* .Logging */ .y._error('Error during decodability check:', error);
             return false;
         }
     }
     async determinePacketType(packet) {
-        if (!(packet instanceof _packet_js__WEBPACK_IMPORTED_MODULE_4__/* .EncodedPacket */ .Z)) {
+        if (!(packet instanceof _packet_js__WEBPACK_IMPORTED_MODULE_5__/* .EncodedPacket */ .Z)) {
             throw new TypeError('packet must be an EncodedPacket.');
         }
         if ((await this.getCodec()) === null) {
@@ -13217,16 +13461,6 @@ const queryInputTracks = async (tracks, query) => {
 (0,_misc_js__WEBPACK_IMPORTED_MODULE_2__/* .polyfillSymbolDispose */ .XQ)();
 const DEFAULT_SOURCE_CACHE_GROUP = 1;
 const ENCRYPTION_KEY_CACHE_GROUP = 2;
-let inputFinalizationRegistry = null;
-if (typeof FinalizationRegistry !== 'undefined') {
-    inputFinalizationRegistry = new FinalizationRegistry((refs) => {
-        for (const ref of refs) {
-            if (!ref.freed) {
-                ref.free();
-            }
-        }
-    });
-}
 /**
  * Represents input media, backed by a single file or multiple files depending on the format.
  *
@@ -13293,7 +13527,6 @@ class Input extends _misc_js__WEBPACK_IMPORTED_MODULE_2__/* .EventEmitter */ .bk
             this._rootRef = options.source;
         }
         this._sourceRefs.push(this._rootRef);
-        inputFinalizationRegistry?.register(this, this._sourceRefs, this);
     }
     /** @internal */
     get _rootSource() {
@@ -13571,9 +13804,12 @@ class Input extends _misc_js__WEBPACK_IMPORTED_MODULE_2__/* .EventEmitter */ .bk
             ref.free();
         }
         this._sourceRefs.length = 0;
-        inputFinalizationRegistry?.unregister(this);
-        void this._demuxerPromise
-            ?.then(demuxer => demuxer.dispose());
+        if (this._demuxerPromise) {
+            // The demuxer promise may already be rejected after failed format detection.
+            void this._demuxerPromise
+                .then(demuxer => demuxer.dispose())
+                .catch(() => { });
+        }
     }
     /**
      * Calls `.dispose()` on the input, implementing the `Disposable` interface for use with
@@ -13763,6 +13999,102 @@ const readDataBox = (slice) => {
         default: return data;
     }
 };
+
+
+/***/ },
+
+/***/ 6103
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   y: () => (/* binding */ Logging)
+/* harmony export */ });
+/* unused harmony export LogLevel */
+/* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3912);
+/*!
+ * Copyright (c) 2026-present, Vanilagy and contributors
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+/**
+ * Controls how much information Mediabunny prints to the console. Higher levels include all lower levels.
+ *
+ * @group Logging
+ * @public
+ */
+var LogLevel;
+(function (LogLevel) {
+    /** Nothing is printed to the console. */
+    LogLevel[LogLevel["Silent"] = 0] = "Silent";
+    /** Only errors are printed. */
+    LogLevel[LogLevel["Errors"] = 1] = "Errors";
+    /** Errors and warnings are printed. */
+    LogLevel[LogLevel["Warnings"] = 2] = "Warnings";
+    /** Errors, warnings, and informational messages are printed. */
+    LogLevel[LogLevel["Info"] = 3] = "Info";
+})(LogLevel || (LogLevel = {}));
+/**
+ * Mediabunny's central logging singleton. Use {@link Logging.level} to control how much is printed to the console,
+ * and subscribe to log events using {@link Logging.on}.
+ *
+ * Having manual control over logging is useful for command-line applications where you want full say over the output.
+ *
+ * @group Logging
+ * @public
+ */
+class Logging {
+    constructor() { }
+    /** The current log level. Defaults to {@link LogLevel.Info}. */
+    static get level() {
+        return Logging._level;
+    }
+    static set level(value) {
+        if (value !== LogLevel.Silent
+            && value !== LogLevel.Errors
+            && value !== LogLevel.Warnings
+            && value !== LogLevel.Info) {
+            throw new TypeError('Invalid log level. Use one of the values of the LogLevel enum.');
+        }
+        Logging._level = value;
+    }
+    /** @internal */
+    static get _emitter() {
+        // Created lazily to avoid touching the EventEmitter binding at module-eval time
+        return Logging._emitterInstance ??= new _misc_js__WEBPACK_IMPORTED_MODULE_0__/* .EventEmitter */ .bk();
+    }
+    /** Registers a listener for a log event. Returns a function that, when called, removes the listener again. */
+    static on(event, listener, options) {
+        return Logging._emitter.on(event, listener, options);
+    }
+    /** @internal */
+    static _error(...args) {
+        Logging._emitter._emit('error', args);
+        if (Logging._level >= LogLevel.Errors) {
+            console.error(...args);
+        }
+    }
+    /** @internal */
+    static _warn(...args) {
+        Logging._emitter._emit('warn', args);
+        if (Logging._level >= LogLevel.Warnings) {
+            console.warn(...args);
+        }
+    }
+    /** @internal */
+    static _info(...args) {
+        Logging._emitter._emit('info', args);
+        if (Logging._level >= LogLevel.Info) {
+            console.info(...args);
+        }
+    }
+}
+/** @internal */
+Logging._level = LogLevel.Info;
+/** @internal */
+Logging._emitterInstance = null;
 
 
 /***/ },
@@ -14334,14 +14666,14 @@ class Reader {
                     // It only took one read to get to know the whole file size
                     return this.requestSlice(0, this.fileSizeNonStrict);
                 }
-                const startOffset = chunks.length * CHUNK_SIZE;
-                let slice = this.requestSliceRange(startOffset, 0, CHUNK_SIZE);
+                let slice = this.requestSliceRange(currentSize, 0, CHUNK_SIZE);
                 if (slice instanceof Promise)
                     slice = await slice;
-                if (!slice) {
+                if (!slice || slice.length === 0) {
                     break;
                 }
-                chunks.push(readBytes(slice, slice.length));
+                const chunk = readBytes(slice, slice.length);
+                chunks.push(chunk);
                 currentSize += slice.length;
             }
             const joined = new Uint8Array(currentSize);
@@ -14545,10 +14877,11 @@ var _node_js__WEBPACK_IMPORTED_MODULE_1___namespace_cache;
 /* harmony export */   oV: () => (/* binding */ DEFAULT_MIN_READ_POSITION),
 /* harmony export */   r3: () => (/* binding */ CustomPathedSource)
 /* harmony export */ });
-/* unused harmony exports BufferSource, BlobSource, FilePathSource, StreamSource, NullSource, RangedSource */
+/* unused harmony exports BufferSource, BlobSource, FilePathSource, CustomSource, StreamSource, NullSource, RangedSource */
 /* harmony import */ var _misc_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3912);
 /* harmony import */ var _node_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1845);
 /* harmony import */ var _input_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(2030);
+/* harmony import */ var _logging_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(6103);
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
  *
@@ -14559,12 +14892,19 @@ var _node_js__WEBPACK_IMPORTED_MODULE_1___namespace_cache;
 
 
 
+
 (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .polyfillSymbolDispose */ .XQ)();
 const node = typeof /*#__PURE__*/ (_node_js__WEBPACK_IMPORTED_MODULE_1___namespace_cache || (_node_js__WEBPACK_IMPORTED_MODULE_1___namespace_cache = __webpack_require__.t(_node_js__WEBPACK_IMPORTED_MODULE_1__, 2))) !== 'undefined'
     ? /*#__PURE__*/ (_node_js__WEBPACK_IMPORTED_MODULE_1___namespace_cache || (_node_js__WEBPACK_IMPORTED_MODULE_1___namespace_cache = __webpack_require__.t(_node_js__WEBPACK_IMPORTED_MODULE_1__, 2))) // Aliasing it prevents some bundler warnings
     : undefined;
 const DEFAULT_MIN_READ_POSITION = 0;
 const DEFAULT_MAX_READ_POSITION = Infinity;
+let sourceFinalizationRegistry = null;
+if (typeof FinalizationRegistry !== 'undefined') {
+    sourceFinalizationRegistry = new FinalizationRegistry((cleanup) => {
+        cleanup();
+    });
+}
 /**
  * The source base class, representing a resource from which bytes can be read.
  * @group Input sources
@@ -14572,7 +14912,7 @@ const DEFAULT_MAX_READ_POSITION = Infinity;
  */
 class Source extends _misc_js__WEBPACK_IMPORTED_MODULE_0__/* .EventEmitter */ .bk {
     constructor() {
-        super(...arguments);
+        super();
         /** @internal */
         this._disposed = false;
         /** @internal */
@@ -14582,6 +14922,13 @@ class Source extends _misc_js__WEBPACK_IMPORTED_MODULE_0__/* .EventEmitter */ .b
          * @internal
          */
         this._usedForHls = false;
+        /**
+         * FinalizationRegistry for rogue refs to this source that didn't get freed. It lives on the Source itself so that
+         * in case the Source transitively points back to itself and forms a cycle (for example through a custom
+         * CustomSource callback) that we're not leaking memory.
+         * @internal
+         */
+        this._refFinalizationRegistry = null;
         /** @internal */
         this._sizePromise = null;
         /**
@@ -14590,6 +14937,11 @@ class Source extends _misc_js__WEBPACK_IMPORTED_MODULE_0__/* .EventEmitter */ .b
          * @deprecated Use `source.on('read', ({ start, end }) => ...)` instead.
          */
         this.onread = null;
+        if (typeof FinalizationRegistry !== 'undefined') {
+            this._refFinalizationRegistry = new FinalizationRegistry((source) => {
+                source._decrementRefCount();
+            });
+        }
     }
     /**
      * Resolves with the total size of the file in bytes. This function is memoized, meaning only the first call
@@ -14656,6 +15008,18 @@ class Source extends _misc_js__WEBPACK_IMPORTED_MODULE_0__/* .EventEmitter */ .b
     ref() {
         return new SourceRef(this);
     }
+    /** @internal */
+    _incrementRefCount() {
+        this._refCount++;
+    }
+    /** @internal */
+    _decrementRefCount() {
+        this._refCount--;
+        if (this._refCount === 0) {
+            this._dispose();
+            this._disposed = true;
+        }
+    }
 }
 /**
  * A reference to a {@link Source}, used to manage a source's lifecycle. Creating a `SourceRef` via {@link Source.ref}
@@ -14673,7 +15037,8 @@ class SourceRef {
         if (source._disposed) {
             throw new Error('Cannot ref a disposed source.');
         }
-        source._refCount++;
+        source._incrementRefCount();
+        source._refFinalizationRegistry?.register(this, source, this);
         this._source = source;
     }
     /** The {@link Source} this ref references. Accessing this field throws an error after having freed the ref. */
@@ -14697,11 +15062,8 @@ class SourceRef {
         }
         const source = this.source;
         (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .assert */ .vA)(source._refCount > 0);
-        source._refCount--;
-        if (source._refCount === 0) {
-            source._dispose();
-            source._disposed = true;
-        }
+        source._decrementRefCount();
+        source._refFinalizationRegistry?.unregister(this);
         this._freed = true;
         this._source = null;
     }
@@ -14721,7 +15083,12 @@ class SourceRef {
  */
 class PathedSource extends Source {
     constructor(
-    /** The path that points to the root file; the entry file of the media. */
+    /**
+     * The path that points to the root file; the entry file of the media.
+     *
+     * This path may be modified by the source to indicate a redirect: an updated path to perform new requests
+     * relative to.
+     */
     rootPath, 
     /** The callback that is called for each requested file; must return a {@link Source} or {@link SourceRef}. */
     requestHandler) {
@@ -14989,7 +15356,7 @@ const DEFAULT_RETRY_DELAY = ((previousAttempts, error, src) => {
         // If user is offline, it is probably not a CORS error.
         const isOnline = typeof navigator !== 'undefined' && typeof navigator.onLine === 'boolean' ? navigator.onLine : true;
         if (isOnline && originOfSrc !== null && originOfSrc !== window.location.origin) {
-            console.warn(`Request will not be retried because a CORS error was suspected due to different origins. You can`
+            _logging_js__WEBPACK_IMPORTED_MODULE_3__/* .Logging */ .y._warn(`Request will not be retried because a CORS error was suspected due to different origins. You can`
                 + ` modify this behavior by providing your own function for the 'getRetryDelay' option.`);
             return null;
         }
@@ -15007,8 +15374,8 @@ class UrlSource extends PathedSource {
     /**
      * Creates a new {@link UrlSource} backed by the resource at the specified URL.
      *
-     * When passing a `Request` instance, note that the `signal` and `headers.Range` options will be overridden by
-     * Mediabunny. If you want to cancel ongoing requests, use {@link Input.dispose}.
+     * When passing a `Request` instance, note that its `signal` will be overridden by Mediabunny; if you want to cancel
+     * ongoing requests, use {@link Input.dispose}.
      */
     constructor(url, options = {}) {
         if (typeof url !== 'string'
@@ -15042,6 +15409,10 @@ class UrlSource extends PathedSource {
                 ? url.href
                 : url;
         super(urlString, request => new UrlSource(request.path, this._options));
+        /** @internal */
+        this._offset = 0;
+        /** @internal */
+        this._length = null;
         /**
          * Note that this value being true does NOT mean the file size can't change anymore; it just signals that we have at
          * least checked if we know the file size or not.
@@ -15051,6 +15422,36 @@ class UrlSource extends PathedSource {
         this._url = url;
         this._options = options;
         this._getRetryDelay = options.getRetryDelay ?? DEFAULT_RETRY_DELAY;
+        // A user-supplied Range header is interpreted as a byte offset (and optional length) into the resource. We
+        // pull it out of the request and remember it for subsequent requests.
+        this._requestInit = { ...options.requestInit };
+        let rangeHeaderValue = null;
+        if (options.requestInit?.headers) {
+            const headers = { ...(0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .normalizeHeaders */ .qx)(options.requestInit.headers) };
+            const rangeKey = Object.keys(headers).find(key => key.toLowerCase() === 'range');
+            if (rangeKey !== undefined) {
+                rangeHeaderValue = headers[rangeKey];
+                delete headers[rangeKey];
+                this._requestInit.headers = headers;
+            }
+        }
+        if (url instanceof Request) {
+            const requestRange = url.headers.get('Range');
+            if (requestRange !== null) {
+                rangeHeaderValue ??= requestRange;
+                // Clone the request so we don't mutate the user's object, then strip the Range header
+                const strippedRequest = new Request(url);
+                strippedRequest.headers.delete('Range');
+                this._url = strippedRequest;
+            }
+        }
+        if (rangeHeaderValue !== null) {
+            const parsed = parseByteRangeHeader(rangeHeaderValue);
+            if (parsed) {
+                this._offset = parsed.offset;
+                this._length = parsed.length;
+            }
+        }
         // Most files in the real-world have a single sequential access pattern, but having two in parallel can
         // also happen
         const DEFAULT_PARALLELISM = 2;
@@ -15063,20 +15464,42 @@ class UrlSource extends PathedSource {
     }
     /** @internal */
     _getFileSize() {
-        return this._fileSizeDetermined
-            ? this._orchestrator.fileSize
-            : undefined;
+        if (!this._fileSizeDetermined) {
+            return this._length !== null ? this._length : undefined;
+        }
+        const baseSize = this._orchestrator.fileSize;
+        if (baseSize === null) {
+            return this._length !== null ? this._length : null;
+        }
+        return (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .clamp */ .qE)(baseSize - this._offset, 0, this._length ?? Infinity);
     }
     /** @internal */
     _read(start, end, minReadPosition, maxReadPosition) {
-        return this._orchestrator.read(start, end, minReadPosition, maxReadPosition);
+        if (this._length !== null && end > this._length) {
+            return null;
+        }
+        const offset = this._offset;
+        const result = this._orchestrator.read(offset + start, offset + end, Math.max(offset + minReadPosition, offset), offset + Math.min(maxReadPosition, this._length ?? Infinity));
+        const processResult = (result) => {
+            if (!result) {
+                return null;
+            }
+            result.offset -= this._offset;
+            return result;
+        };
+        if (result instanceof Promise) {
+            return result.then(processResult);
+        }
+        else {
+            return processResult(result);
+        }
     }
     /** @internal */
     async _runWorker(worker) {
         // The outer loop is for resuming a request if it dies mid-response
         while (true) {
             const abortController = new AbortController();
-            const response = await (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .retriedFetch */ .G8)(this._options.fetchFn ?? fetch, this._url, (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .mergeRequestInit */ ._h)(this._options.requestInit ?? {}, {
+            const response = await (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .retriedFetch */ .G8)(this._options.fetchFn ?? fetch, this._url, (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .mergeRequestInit */ ._h)(this._requestInit, {
                 headers: {
                     // Always sending a range request is a good way to probe if the server supports them
                     Range: `bytes=${worker.currentPos}-`,
@@ -15086,6 +15509,10 @@ class UrlSource extends PathedSource {
             if (!response.ok) {
                 // eslint-disable-next-line @typescript-eslint/no-base-to-string
                 throw new Error(`Error fetching ${String(this._url)}: ${response.status} ${response.statusText}`);
+            }
+            if (response.redirected) {
+                // Modify our own root path so that future subrequests get made relative to the redirected URL
+                this.rootPath = response.url;
             }
             outer: if (this._orchestrator.fileSize === null) {
                 // See if we can deduce the file size from the response
@@ -15113,8 +15540,7 @@ class UrlSource extends PathedSource {
                         // Don't show the warning for M3U8 playlist files, it's irrelevant for those
                         && !(url.pathname.endsWith('.m3u8') || url.pathname.endsWith('.m3u'))) {
                         if (!warnedOrigins.has(url.origin)) {
-                            console.log(this._usedForHls, this._url, url.pathname);
-                            console.warn(`HTTP server (origin ${url.origin}) did not respond to a range request with 206 Partial`
+                            _logging_js__WEBPACK_IMPORTED_MODULE_3__/* .Logging */ .y._warn(`HTTP server (origin ${url.origin}) did not respond to a range request with 206 Partial`
                                 + ' Content, meaning the entire resource will now be downloaded. To enable efficient'
                                 + ' media file streaming across a network, please make sure your server supports'
                                 + ' range requests.');
@@ -15156,7 +15582,7 @@ class UrlSource extends PathedSource {
                     }
                     const retryDelayInSeconds = this._getRetryDelay(1, error, this._url);
                     if (retryDelayInSeconds !== null) {
-                        console.error('Error while reading response stream. Attempting to resume.', error);
+                        _logging_js__WEBPACK_IMPORTED_MODULE_3__/* .Logging */ .y._error('Error while reading response stream. Attempting to resume.', error);
                         await (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .wait */ .uk)(1000 * retryDelayInSeconds);
                         break;
                     }
@@ -15199,6 +15625,22 @@ class UrlSource extends PathedSource {
         this._orchestrator.dispose();
     }
 }
+const BYTE_RANGE_REGEX = /^bytes=(\d+)-(\d*)$/;
+const parseByteRangeHeader = (value) => {
+    const match = BYTE_RANGE_REGEX.exec(value.trim());
+    if (!match) {
+        return null;
+    }
+    const offset = Number(match[1]);
+    const end = match[2] === '' ? null : Number(match[2]);
+    if (end !== null && end < offset) {
+        return null;
+    }
+    return {
+        offset,
+        length: end !== null ? end - offset + 1 : null,
+    };
+};
 /**
  * A source backed by a path to a file. Intended for server-side usage in Node, Bun, or Deno.
  *
@@ -15226,11 +15668,16 @@ class FilePathSource extends PathedSource {
         super(filePath, request => new FilePathSource(request.path, options));
         /** @internal */
         this._fileHandle = null;
-        // Let's back this source with a StreamSource, makes the implementation very simple
-        this._streamSource = new StreamSource({
+        // Let's back this source with a CustomSource, makes the implementation very simple
+        this._customSource = new CustomSource({
             getSize: async () => {
-                this._fileHandle = await node.fs.open(filePath, 'r');
-                const stats = await this._fileHandle.stat();
+                const fileHandle = await node.fs.open(filePath, 'r');
+                this._fileHandle = fileHandle;
+                sourceFinalizationRegistry?.register(this, () => {
+                    // If it's not closed, Node prints annoying warnings
+                    void fileHandle.close();
+                }, this);
+                const stats = await fileHandle.stat();
                 return stats.size;
             },
             read: async (start, end) => {
@@ -15245,26 +15692,30 @@ class FilePathSource extends PathedSource {
     }
     /** @internal */
     _read(start, end, minReadPosition, maxReadPosition) {
-        return this._streamSource._read(start, end, minReadPosition, maxReadPosition);
+        return this._customSource._read(start, end, minReadPosition, maxReadPosition);
     }
     /** @internal */
     _getFileSize() {
-        return this._streamSource._getFileSize();
+        return this._customSource._getFileSize();
     }
     /** @internal */
     _dispose() {
-        this._streamSource._dispose();
-        void this._fileHandle?.close();
-        this._fileHandle = null;
+        this._customSource._dispose();
+        if (this._fileHandle) {
+            void this._fileHandle.close();
+            this._fileHandle = null;
+            sourceFinalizationRegistry?.unregister(this);
+        }
     }
 }
 /**
- * A general-purpose, callback-driven source that can get its data from anywhere.
+ * A general-purpose, callback-driven source that can get its data from anywhere. Use this source to implement your own
+ * custom source if the other sources don't cover your case.
  * @group Input sources
  * @public
  */
-class StreamSource extends Source {
-    /** Creates a new {@link StreamSource} whose behavior is specified by `options`.  */
+class CustomSource extends Source {
+    /** Creates a new {@link CustomSource} whose behavior is specified by `options`.  */
     constructor(options) {
         if (!options || typeof options !== 'object') {
             throw new TypeError('options must be an object.');
@@ -15376,6 +15827,14 @@ class StreamSource extends Source {
         this._options.dispose?.();
     }
 }
+/**
+ * An alias for {@link CustomSource}.
+ * @deprecated This name is misleading and will be removed in a future release. Please use {@link CustomSource} instead.
+ *
+ * @group Input sources
+ * @public
+ */
+const StreamSource = (/* unused pure expression or super */ null && (CustomSource));
 /**
  * A source backed by a [`ReadableStream`](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) of
  * `Uint8Array`, representing an append-only byte stream of unknown length. This is the source to use for incrementally
@@ -15798,6 +16257,13 @@ class ReadOrchestrator {
         }
         else {
             // The requested region was satisfied by the cache, but the entire prefetch region was not
+            promise.catch((error) => {
+                if (this.disposed) {
+                    return; // Swallow the error
+                }
+                // Nobody's awaiting this result but an errored read is still notable
+                throw error;
+            });
         }
         return result;
     }
@@ -15890,7 +16356,7 @@ class ReadOrchestrator {
                 worker.pendingSlices.forEach(x => x.reject(error)); // Make sure to propagate any errors
                 worker.pendingSlices.length = 0;
             }
-            else {
+            else if (!worker.aborted && !this.disposed) {
                 throw error; // So it doesn't get swallowed
             }
         })
@@ -15908,9 +16374,13 @@ class ReadOrchestrator {
                     }
                 }
                 const queuedRead = this.queuedReads[oldestIndex];
-                this.queuedReads.splice(oldestIndex, 1);
                 const newWorker = this.createWorker(queuedRead.hole.start, queuedRead.hole.end, queuedRead.strictTarget);
-                (0,_misc_js__WEBPACK_IMPORTED_MODULE_0__/* .assert */ .vA)(newWorker); // We just freed up a worker, so this should never fail
+                if (!newWorker) {
+                    // In high-contention cases, it could be that we've already reached max worker count, so in this
+                    // case we don't do anything.
+                    return;
+                }
+                this.queuedReads.splice(oldestIndex, 1);
                 newWorker.pendingSlices = queuedRead.pendingSlices;
                 this.runWorker(newWorker);
             }
@@ -16212,21 +16682,18 @@ class RangedSource extends Source {
             return null;
         }
         const result = this._baseSource._read(this._offset + start, this._offset + end, this._offset + minReadPosition, this._offset + maxReadPosition);
-        if (result instanceof Promise) {
-            return result.then((result) => {
-                if (!result) {
-                    return null;
-                }
-                result.offset -= this._offset;
-                return result;
-            });
-        }
-        else {
+        const processResult = (result) => {
             if (!result) {
                 return null;
             }
             result.offset -= this._offset;
             return result;
+        };
+        if (result instanceof Promise) {
+            return result.then(processResult);
+        }
+        else {
+            return processResult(result);
         }
     }
     /** @internal */

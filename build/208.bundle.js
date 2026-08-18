@@ -7,8 +7,9 @@
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   registerAacEncoder: () => (/* binding */ registerAacEncoder)
 /* harmony export */ });
-/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3936);
-/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(8647);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6103);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3936);
+/* harmony import */ var mediabunny__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8647);
 /*!
  * Copyright (c) 2026-present, Vanilagy and contributors
  *
@@ -22,6 +23,9 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
+
+// packages/aac-encoder/src/index.ts
+
 
 // shared/bitstream.ts
 var Bitstream = class _Bitstream {
@@ -3267,7 +3271,7 @@ var AAC_SAMPLE_RATES = [
   8e3,
   7350
 ];
-var AacEncoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .CustomAudioEncoder */ .Q5 {
+var AacEncoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_2__/* .CustomAudioEncoder */ .Q5 {
   constructor() {
     super(...arguments);
     this.worker = null;
@@ -3425,7 +3429,7 @@ var AacEncoder = class extends mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .Custom
         adtsFrame.set(data, header.byteLength);
         data = adtsFrame;
       }
-      const packet = new mediabunny__WEBPACK_IMPORTED_MODULE_0__/* .EncodedPacket */ .Z(
+      const packet = new mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .EncodedPacket */ .Z(
         data,
         "key",
         this.nextPacketTimestampInSamples / this.sampleRate,
@@ -3461,7 +3465,7 @@ var registerAacEncoder = () => {
     return;
   }
   registered = true;
-  (0,mediabunny__WEBPACK_IMPORTED_MODULE_1__/* .registerEncoder */ .kf)(AacEncoder);
+  (0,mediabunny__WEBPACK_IMPORTED_MODULE_2__/* .registerEncoder */ .kf)(AacEncoder);
 };
 function assert(x) {
   if (!x) {
@@ -3472,7 +3476,7 @@ function assert(x) {
 // packages/aac-encoder/src/index.ts
 var AAC_ENCODER_LOADED_SYMBOL = Symbol.for("@mediabunny/aac-encoder loaded");
 if (globalThis[AAC_ENCODER_LOADED_SYMBOL]) {
-  console.error(
+  mediabunny__WEBPACK_IMPORTED_MODULE_0__/* .Logging */ .y._error(
     "[WARNING]\n@mediabunny/aac-encoder was loaded twice. This will likely cause the encoder not to work correctly. Check if multiple dependencies are importing different versions of @mediabunny/aac-encoder, or if something is being bundled incorrectly."
   );
 }

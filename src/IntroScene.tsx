@@ -79,7 +79,7 @@ export const IntroScene: React.FC = () => {
 
       {/* Main content */}
       <div style={{ position: 'relative', zIndex: 1, textShadow: '0 0 20px currentColor' }}>
-        Menggambarkan kemajuan teknologi AI dan dampaknya di masa depan
+        Mengintroduksikan teknologi AI dan manfaatnya dalam kehidupan sehari-hari
       </div>
 
       <style>{`

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NANDO INVENTORY AI</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-theme="light">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="logo">&#128187;</span>
+        <h1>NANDO INVENTORY AI</h1>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-view="dashboard">
+          <span>&#128200;</span> Dashboard
+        </button>
+        <button class="nav-btn" data-view="software">
+          <span>&#128190;</span> Software
+        </button>
+        <button class="nav-btn" data-view="licenses">
+          <span>&#128274;</span> Lisensi
+        </button>
+        <button class="nav-btn" data-view="assistant">
+          <span>&#129302;</span> AI Assistant
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="btn-settings" class="nav-btn" title="Pengaturan & cadangan">
+          <span>&#9881;</span> Pengaturan
+        </button>
+        <button id="btn-darkmode" class="nav-btn" title="Mode gelap">
+          <span>&#127769;</span> <span id="darkmode-label">Mode Terang</span>
+        </button>
+        <div class="footer-note">Data tersimpan lokal</div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- DASHBOARD -->
+      <section id="view-dashboard" class="view active">
+        <header class="page-header">
+          <h2>Dashboard</h2>
+          <div class="toolbar">
+            <button id="btn-export-excel" class="btn">Export Excel</button>
+            <button id="btn-export-pdf" class="btn">Export PDF</button>
+            <button id="btn-ai-summary" class="btn primary">Ringkasan Bulanan (AI)</button>
+          </div>
+          <p class="sub">Ringkasan inventaris perangkat lunak</p>
+        </header>
+
+        <div class="cards">
+          <div class="card">
+            <span class="card-icon blue">&#128190;</span>
+            <div><h3 id="stat-total">0</h3><p>Total Software</p></div>
+          </div>
+          <div class="card">
+            <span class="card-icon green">&#9989;</span>
+            <div><h3 id="stat-valid">0</h3><p>Lisensi Valid</p></div>
+          </div>
+          <div class="card">
+            <span class="card-icon orange">&#9201;</span>
+            <div><h3 id="stat-expiring">0</h3><p>Hampir Kedaluwarsa</p></div>
+          </div>
+          <div class="card">
+            <span class="card-icon red">&#10060;</span>
+            <div><h3 id="stat-expired">0</h3><p>Kedaluwarsa</p></div>
+          </div>
+          <div class="card">
+            <span class="card-icon blue">&#128176;</span>
+            <div><h3 id="stat-budget">Rp 0</h3><p>Total Anggaran</p></div>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="panel">
+            <h3>Software per Kategori</h3>
+            <div id="chart-category" class="chart"></div>
+          </div>
+          <div class="panel">
+            <h3>Biaya per Kategori</h3>
+            <div id="chart-cost" class="chart"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Software Terbaru</h3>
+          <table class="table">
+            <thead>
+              <tr><th>Nama</th><th>Versi</th><th>Kategori</th><th>Status Lisensi</th></tr>
+            </thead>
+            <tbody id="recent-software"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SOFTWARE -->
+      <section id="view-software" class="view">
+        <header class="page-header">
+          <h2>Daftar Software</h2>
+          <div class="toolbar">
+            <input id="search-software" type="text" placeholder="Cari nama / vendor..." />
+            <select id="filter-category" title="Filter kategori"></select>
+            <select id="filter-status" title="Filter status lisensi">
+              <option value="">Semua status</option>
+              <option value="valid">Valid</option>
+              <option value="expiring">Hampir Kedaluwarsa</option>
+              <option value="expired">Kedaluwarsa</option>
+              <option value="none">Tanpa lisensi</option>
+            </select>
+            <button id="btn-add-software" class="btn primary">+ Tambah</button>
+          </div>
+        </header>
+
+        <div class="panel">
+          <table class="table">
+            <thead>
+              <tr>
+                <th data-sort="name" class="sortable">Nama &#9650;&#9660;</th>
+                <th data-sort="version" class="sortable">Versi &#9650;&#9660;</th>
+                <th>Kategori</th>
+                <th>Vendor</th>
+                <th class="sortable" data-sort="completeness">Kelengkapan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="software-list"></tbody>
+          </table>
+          <p id="software-empty" class="empty hidden">Belum ada data. Klik "+ Tambah".</p>
+        </div>
+      </section>
+
+      <!-- LICENSES -->
+      <section id="view-licenses" class="view">
+        <header class="page-header">
+          <h2>Manajemen Lisensi</h2>
+          <button id="btn-add-license" class="btn primary">+ Tambah Lisensi</button>
+        </header>
+
+        <div class="panel">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Software</th>
+                <th>Jenis</th>
+                <th>Jumlah</th>
+                <th>Harga/Unit</th>
+                <th>Kedaluwarsa</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="license-list"></tbody>
+          </table>
+          <p id="license-empty" class="empty hidden">Belum ada lisensi.</p>
+        </div>
+      </section>
+
+      <!-- ASSISTANT -->
+      <section id="view-assistant" class="view">
+        <header class="page-header">
+          <h2>AI Assistant</h2>
+          <div class="toolbar">
+            <span id="ollama-status" class="badge unknown">Memeriksa Ollama...</span>
+            <select id="model-select" title="Pilih model Ollama"></select>
+            <button id="btn-new-chat" class="btn">Baru</button>
+          </div>
+        </header>
+        <p class="sub assistant-sub">Tanya data atau minta AI menambah/mengedit software & lisensi. Contoh: "Tambahkan Microsoft 365 dengan 5 lisensi", "Berapa total anggaran?"</p>
+
+        <div class="chat-panel">
+          <div id="chat-messages" class="chat-messages"></div>
+          <div class="chat-input">
+            <textarea id="chat-text" rows="2" placeholder="Tulis pesan untuk asisten AI..."></textarea>
+            <button id="btn-send-chat" class="btn primary">Kirim</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- UNDO BAR -->
+  <div id="undo-bar" class="undo-bar hidden">
+    <span id="undo-text">Perubahan</span>
+    <button id="btn-undo" class="btn sm">Undo</button>
+    <button id="btn-undo-close" class="btn sm">Tutup</button>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- MODAL: FORM -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 id="modal-title">Form</h3>
+      <form id="modal-form">
+        <div id="modal-fields"></div>
+        <div class="modal-actions">
+          <button type="button" id="btn-modal-cancel" class="btn">Batal</button>
+          <button type="submit" id="btn-modal-save" class="btn primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: AI ACTION CONFIRM -->
+  <div id="action-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Konfirmasi Aksi AI</h3>
+      <div id="action-body"></div>
+      <div class="modal-actions">
+        <button type="button" id="btn-action-cancel" class="btn">Batal</button>
+        <button type="button" id="btn-action-apply" class="btn primary">Terapkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS -->
+  <div id="settings-overlay" class="modal-overlay hidden">
+    <div class="modal wide">
+      <h3>Pengaturan & Cadangan</h3>
+      <div class="settings-group">
+        <h4>Data</h4>
+        <div class="toolbar">
+          <button id="btn-backup-download" class="btn">Download Cadangan (JSON)</button>
+          <button id="btn-backup-import" class="btn">Import Data</button>
+          <button id="btn-backup-clear" class="btn danger">Hapus Semua Data</button>
+        </div>
+        <input id="import-file" type="file" accept=".json" class="hidden" />
+        <p class="sub">Data otomatis dicadangkan setiap kali ada perubahan (maks 20 cadangan).</p>
+      </div>
+      <div class="settings-group">
+        <h4>Riwayat Cadangan Otomatis</h4>
+        <div id="backup-list" class="backup-list"><p class="sub">Memuat...</p></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="btn-settings-close" class="btn">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

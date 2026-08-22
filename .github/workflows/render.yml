@@ -57,7 +57,11 @@ jobs:
           else
             # Auto-detect all compositions from Root.tsx
             echo "Auto-detecting compositions from Root.tsx..."
+            set +e
             COMP_OUTPUT=$(npx remotion compositions src/entry.tsx --props='{}' 2>&1)
+            COMP_EXIT=$?
+            set -e
+            echo "Exit code: $COMP_EXIT"
             echo "Full output: $COMP_OUTPUT"
             COMP_LIST=$(echo "$COMP_OUTPUT" | grep -oP '(?<=id: ")[^"]+' || echo "")
             if [ -z "$COMP_LIST" ]; then

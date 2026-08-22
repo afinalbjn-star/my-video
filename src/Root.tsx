@@ -1,7 +1,8 @@
 import React from 'react';
 import { Composition } from 'remotion';
 import { AbstractLoopBackground } from './AbstractLoopBackground';
-import AdobeStockTechBackground from './AdobeStockTechBackground';
+import CyberDataStreamLoop from './CyberDataStreamLoop';
+import { AdobeStockTechBackground } from './AdobeStockTechBackground';
 import NeonCyberTerrain from './NeonCyberTerrain';
 import GoldenNetworkBackground from './GoldenNetworkBackground';
 import ProfessionalAbstractVideo from './ProfessionalAbstractVideo';
@@ -9,6 +10,8 @@ import ProfessionalOceanWaves from './ProfessionalOceanWaves';
 import { MagicalTrainRide } from './MagicalTrainRide/MagicalTrainRide';
 import { ShuttlecockScene } from './ShuttlecockScene';
 import { KidsVideoMain } from './KidsVideo/KidsVideoMain';
+import { LingoMascotScene } from './LingoMascotScene';
+import { EmeraldCoinsLoop } from './EmeraldCoinsLoop';
 
 const FPS = 60;
 const DURATION_IN_SECONDS = 30;
@@ -22,6 +25,15 @@ export const RemotionRoot: React.FC = () => {
 				id="AbstractLoopBackground"
 				component={AbstractLoopBackground}
 				durationInFrames={FPS * 15}
+				fps={FPS}
+				width={VIDEO_WIDTH}
+				height={VIDEO_HEIGHT}
+				defaultProps={{}}
+			/>
+			<Composition
+				id="CyberDataStreamLoop"
+				component={CyberDataStreamLoop}
+				durationInFrames={FPS * 12}
 				fps={FPS}
 				width={VIDEO_WIDTH}
 				height={VIDEO_HEIGHT}
@@ -94,6 +106,23 @@ export const RemotionRoot: React.FC = () => {
 				width={VIDEO_WIDTH}
 				height={VIDEO_HEIGHT}
 			/>
+<Composition
+            id="LingoMascotScene"
+            component={LingoMascotScene}
+            durationInFrames={FPS * 15}
+            fps={FPS}
+            width={VIDEO_WIDTH}
+            height={VIDEO_HEIGHT}
+          />
+          <Composition
+            id="EmeraldCoinsLoop"
+            component={EmeraldCoinsLoop}
+            durationInFrames={FPS * 5}
+            fps={30}
+            width={VIDEO_WIDTH}
+            height={VIDEO_HEIGHT}
+            defaultProps={{}}
+          />
 		</>
 	);
 };

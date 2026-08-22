@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 
 /**
@@ -22,6 +22,29 @@ export const AdobeStockTechBackground: React.FC = () => {
   // Grid pattern for technology theme
   const gridSize = 60;
   const gridOffset = (loopFrame * 3) % gridSize;
+
+  // Inject keyframes on mount
+  useEffect(() => {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      @keyframes bgRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes gridMove {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(60px, 60px); }
+      }
+      @keyframes float {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.2); }
+      }
+    `;
+    document.head.appendChild(styleEl);
+    return () => {
+      document.head.removeChild(styleEl);
+    };
+  }, []);
 
   return (
     <div
@@ -110,20 +133,4 @@ export const AdobeStockTechBackground: React.FC = () => {
   );
 };
 
-/* Keyframes for animations (inject at runtime) */
-const styleEl = document.createElement('style');
-styleEl.textContent = `
-  @keyframes bgRotate {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  @keyframes gridMove {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(${gridSize}px, ${gridSize}px); }
-  }
-  @keyframes float {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.2); }
-  }
-`;
-document.head.appendChild(styleEl);
+export default AdobeStockTechBackground;

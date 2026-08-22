@@ -57,7 +57,9 @@ jobs:
           else
             # Auto-detect all compositions from Root.tsx
             echo "Auto-detecting compositions from Root.tsx..."
-            COMP_LIST=$(npx remotion compositions src/entry.tsx --props='{}' 2>&1 | grep -oP '(?<=id: ")[^"]+' || echo "")
+            COMP_OUTPUT=$(npx remotion compositions src/entry.tsx --props='{}' 2>&1)
+            echo "Full output: $COMP_OUTPUT"
+            COMP_LIST=$(echo "$COMP_OUTPUT" | grep -oP '(?<=id: ")[^"]+' || echo "")
             if [ -z "$COMP_LIST" ]; then
               echo "No compositions detected, using GoldenNetworkBackground as fallback"
               COMP_LIST="GoldenNetworkBackground"

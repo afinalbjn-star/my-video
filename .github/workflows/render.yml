@@ -63,7 +63,10 @@ jobs:
             set -e
             echo "Exit code: $COMP_EXIT"
             echo "Full output: $COMP_OUTPUT"
-            COMP_LIST=$(echo "$COMP_OUTPUT" | grep -oP '(?<=id: ")[^"]+' || echo "")
+            # Strip ANSI escape codes then extract composition IDs
+            COMP_CLEAN=$(echo "$COMP_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g')
+            echo "Cleaned output: $COMP_CLEAN"
+            COMP_LIST=$(echo "$COMP_CLEAN" | grep -oP '(?<=id: ")[^"]+' || echo "")
             if [ -z "$COMP_LIST" ]; then
               echo "No compositions detected, using GoldenNetworkBackground as fallback"
               COMP_LIST="GoldenNetworkBackground"

@@ -58,14 +58,15 @@ jobs:
             # Auto-detect all compositions from Root.tsx
             echo "Auto-detecting compositions from Root.tsx..."
             set +e
-            COMP_OUTPUT=$(npx remotion compositions src/entry.tsx --props='{}' 2>&1)
+            npx remotion compositions src/entry.tsx --props='{}' 2>&1 > compositions.txt
             COMP_EXIT=$?
             set -e
             echo "Exit code: $COMP_EXIT"
-            echo "Full output: $COMP_OUTPUT"
+            cat compositions.txt
             # Strip ANSI escape codes then extract composition IDs
-            COMP_CLEAN=$(echo "$COMP_OUTPUT" | sed 's/\x1b\[[0-9;]*m//g')
-            echo "Cleaned output: $COMP_CLEAN"
+            COMP_CLEAN=$(cat compositions.txt | sed 's/\x1b\[[0-9;]*m//g')
+            echo "Cleaned output:"
+            echo "$COMP_CLEAN"
             COMP_LIST=$(echo "$COMP_CLEAN" | grep -oP '(?<=id: ")[^"]+' || echo "")
             if [ -z "$COMP_LIST" ]; then
               echo "No compositions detected, using GoldenNetworkBackground as fallback"
